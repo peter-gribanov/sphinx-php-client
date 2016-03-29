@@ -11,3 +11,67 @@ Sphinx PHP client
 [![License](https://poser.pugx.org/sphinx/client/license.png)](https://packagist.org/packages/sphinx/client)
 
 Copy / paste from [sphinxsearch/sphinx](https://github.com/sphinxsearch/sphinx/blob/master/api/sphinxapi.php)
+
+Example usage:
+
+```php
+$sphinx = new SphinxClient();
+$sphinx->setServer('localhost', 6712);
+$sphinx->setMatchMode(SPH_MATCH_ANY);
+$sphinx->setMaxQueryTime(3);
+
+$result = $sphinx->query('test');
+
+var_dump($result);
+```
+
+Result:
+```
+array(10) {
+  ["error"]=>
+  string(0) ""
+  ["warning"]=>
+  string(0) ""
+  ["status"]=>
+  int(0)
+  ["fields"]=>
+  array(3) {
+    [0]=>
+    string(7) "subject"
+    [1]=>
+    string(4) "body"
+    [2]=>
+    string(6) "author"
+  }
+  ["attrs"]=>
+  array(0) {
+  }
+  ["matches"]=>
+  array(1) {
+    [3]=>
+    array(2) {
+      ["weight"]=>
+      int(1)
+      ["attrs"]=>
+      array(0) {
+      }
+    }
+  }
+  ["total"]=>
+  int(1)
+  ["total_found"]=>
+  int(1)
+  ["time"]=>
+  float(0)
+  ["words"]=>
+  array(1) {
+    ["to"]=>
+    array(2) {
+      ["docs"]=>
+      int(1)
+      ["hits"]=>
+      int(1)
+    }
+  }
+}
+```
