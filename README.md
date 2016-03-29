@@ -93,4 +93,4 @@ array(10) {
 ## License
 
 This bundle is under the [GPL-3.0 license](https://opensource.org/licenses/GPL-3.0).
-See the complete license in the bundle: LICENSE
+See the complete license in the file: LICENSE
