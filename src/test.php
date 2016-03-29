@@ -4,7 +4,7 @@
 // $Id$
 //
 
-require ( "sphinxapi.php" );
+require "SphinxClient.php";
 
 //////////////////////
 // parse command line
