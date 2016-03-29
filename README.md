@@ -1,3 +1,7 @@
+# Attention! Do not use this repository!
+
+See this [bug report](http://sphinxsearch.com/bugs/view.php?id=2443) for more info.
+
 [![Latest Stable Version](https://poser.pugx.org/sphinx/client/v/stable)](https://packagist.org/packages/sphinx/client)
 [![Total Downloads](https://poser.pugx.org/sphinx/client/downloads)](https://packagist.org/packages/sphinx/client)
 [![Latest Unstable Version](https://poser.pugx.org/sphinx/client/v/unstable)](https://packagist.org/packages/sphinx/client)
