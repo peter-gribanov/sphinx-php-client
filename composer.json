@@ -1,0 +1,8 @@
+{
+  "name": "sphinx/client",
+  "license": "GPL-2.0",
+  "type": "library",
+  "autoload": {
+    "files": [ "src/sphinxapi.php" ]
+  }
+}
