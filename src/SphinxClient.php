@@ -805,11 +805,14 @@ class SphinxClient
         $this->sortby = $sortby;
     }
 
-    /// bind per-field weights by order
-    /// DEPRECATED; use SetFieldWeights() instead
+    /**
+     * Bind per-field weights by order
+     *
+     * @deprecated use setFieldWeights() instead
+     */
     public function setWeights()
     {
-        throw new \RuntimeException('This method is now deprecated; please use SetFieldWeights instead');
+        throw new \RuntimeException('This method is now deprecated; please use setFieldWeights instead');
     }
 
     /// bind per-field weights by name
