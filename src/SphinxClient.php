@@ -762,7 +762,10 @@ class SphinxClient
     /// set matching mode
     function SetMatchMode($mode)
     {
-        trigger_error('DEPRECATED: Do not call this method or, even better, use SphinxQL instead of an API', E_USER_DEPRECATED);
+        trigger_error(
+            'DEPRECATED: Do not call this method or, even better, use SphinxQL instead of an API',
+            E_USER_DEPRECATED
+        );
         assert(
             $mode == SPH_MATCH_ALL ||
             $mode == SPH_MATCH_ANY ||
@@ -980,9 +983,18 @@ class SphinxClient
     /// $values must be a hash that maps document IDs to attribute values
     function SetOverride($attrname, $attrtype, $values)
     {
-        trigger_error('DEPRECATED: Do not call this method. Use SphinxQL REMAP() function instead.', E_USER_DEPRECATED);
+        trigger_error(
+            'DEPRECATED: Do not call this method. Use SphinxQL REMAP() function instead.',
+            E_USER_DEPRECATED
+        );
         assert(is_string($attrname));
-        assert(in_array($attrtype, array(SPH_ATTR_INTEGER, SPH_ATTR_TIMESTAMP, SPH_ATTR_BOOL, SPH_ATTR_FLOAT, SPH_ATTR_BIGINT)));
+        assert(in_array($attrtype, array(
+            SPH_ATTR_INTEGER,
+            SPH_ATTR_TIMESTAMP,
+            SPH_ATTR_BOOL,
+            SPH_ATTR_FLOAT,
+            SPH_ATTR_BIGINT
+        )));
         assert(is_array($values));
 
         $this->_overrides[$attrname] = array(
@@ -1021,7 +1033,10 @@ class SphinxClient
         );
 
         assert(isset($flag_name, $known_names));
-        assert(in_array($flag_value, $flags[$flag_name], true) || ($flag_name == 'max_predicted_time' && is_int($flag_value) && $flag_value >= 0));
+        assert(
+            in_array($flag_value, $flags[$flag_name], true) ||
+            ($flag_name == 'max_predicted_time' && is_int($flag_value) && $flag_value >= 0)
+        );
 
         if ($flag_name == 'reverse_scan') {
             $this->_query_flags = sphSetBit($this->_query_flags, 0, $flag_value == 1);
