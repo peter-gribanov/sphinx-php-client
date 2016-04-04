@@ -67,66 +67,102 @@ $sortexpr = '';
 $limit = 20;
 $ranker = SPH_RANK_PROXIMITY_BM25;
 $select = '';
-for($i = 0; $i < count($args); $i++) {
-    $arg = $args[$i];
 
-    if ($arg == '-h' || $arg=='--host') {
-        $host = $args[++$i];
-    } elseif ($arg == '-p' || $arg == '--port') {
-        $port = (int)$args[++$i];
-    } elseif ($arg == '-i' || $arg == '--index') {
-        $index = $args[++$i];
-    } elseif ($arg == '-s' || $arg == '--sortby') {
-        $sortby = $args[++$i];
-        $sortexpr = '';
-    } elseif ($arg == '-S' || $arg == '--sortexpr') {
-        $sortexpr = $args[++$i];
-        $sortby = '';
-    } elseif ($arg == '-a' || $arg == '--any') {
-        $mode = SPH_MATCH_ANY;
-    } elseif ($arg == '-b' || $arg == '--boolean') {
-        $mode = SPH_MATCH_BOOLEAN;
-    } elseif ($arg == '-e' || $arg == '--extended') {
-        $mode = SPH_MATCH_EXTENDED;
-    } elseif ($arg == '-e2') {
-        $mode = SPH_MATCH_EXTENDED2;
-    } elseif ($arg == '-ph'|| $arg == '--phrase') {
-        $mode = SPH_MATCH_PHRASE;
-    } elseif ($arg == '-f' || $arg == '--filter') {
-        $filter = $args[++$i];
-    } elseif ($arg == '-v' || $arg == '--value') {
-        $filtervals[] = $args[++$i];
-    } elseif ($arg == '-g' || $arg == '--groupby') {
-        $groupby = $args[++$i];
-    } elseif ($arg == '-gs'|| $arg == '--groupsort') {
-        $groupsort = $args[++$i];
-    } elseif ($arg == '-d' || $arg == '--distinct') {
-        $distinct = $args[++$i];
-    } elseif ($arg == '-l' || $arg == '--limit') {
-        $limit = (int)$args[++$i];
-    } elseif ($arg == '--select') {
-        $select = $args[++$i];
-    } elseif ($arg == '-fr' || $arg == '--filterrange') {
-        $cl->setFilterRange($args[++$i], $args[++$i], $args[++$i]);
-    } elseif ($arg == '-r') {
-        $arg = strtolower($args[++$i]);
-        if ($arg == 'bm25') {
-            $ranker = SPH_RANK_BM25;
-        }
-        if ($arg == 'none') {
-            $ranker = SPH_RANK_NONE;
-        }
-        if ($arg == 'wordcount') {
-            $ranker = SPH_RANK_WORDCOUNT;
-        }
-        if ($arg == 'fieldmask') {
-            $ranker = SPH_RANK_FIELDMASK;
-        }
-        if ($arg == 'sph04') {
-            $ranker = SPH_RANK_SPH04;
-        }
-    } else {
-        $q .= $args[$i] . ' ';
+for ($i = 0; $i < count($args); $i++) {
+    switch ($args[$i]) {
+        case '-h':
+        case '--host':
+            $host = $args[++$i];
+            break;
+        case '-p':
+        case '--port':
+            $port = (int)$args[++$i];
+            break;
+        case '-i':
+        case '--index':
+            $index = $args[++$i];
+            break;
+        case '-s':
+        case '--sortby':
+            $sortby = $args[++$i];
+            $sortexpr = '';
+            break;
+        case '-S':
+        case '--sortexpr':
+            $sortexpr = $args[++$i];
+            $sortby = '';
+            break;
+        case '-a':
+        case '--any':
+            $mode = SPH_MATCH_ANY;
+            break;
+        case '-b':
+        case '--boolean':
+            $mode = SPH_MATCH_BOOLEAN;
+            break;
+        case '-e':
+        case '--extended':
+            $mode = SPH_MATCH_EXTENDED;
+            break;
+        case '-e2':
+            $mode = SPH_MATCH_EXTENDED2;
+            break;
+        case '-ph':
+        case '--phrase':
+            $mode = SPH_MATCH_PHRASE;
+            break;
+        case '-f':
+        case '--filter':
+            $filter = $args[++$i];
+            break;
+        case '-v':
+        case '--value':
+            $filtervals[] = $args[++$i];
+            break;
+        case '-g':
+        case '--groupby':
+            $groupby = $args[++$i];
+            break;
+        case '-gs':
+        case '--groupsort':
+            $groupsort = $args[++$i];
+            break;
+        case '-d':
+        case '--distinct':
+            $distinct = $args[++$i];
+            break;
+        case '-l':
+        case '--limit':
+            $limit = (int)$args[++$i];
+            break;
+        case '--select':
+            $select = $args[++$i];
+            break;
+        case '-fr':
+        case '--filterrange':
+            $cl->setFilterRange($args[++$i], $args[++$i], $args[++$i]);
+            break;
+        case '-r':
+            switch (strtolower($args[++$i])) {
+                case 'bm25':
+                    $ranker = SPH_RANK_BM25;
+                    break;
+                case 'none':
+                    $ranker = SPH_RANK_NONE;
+                    break;
+                case 'wordcount':
+                    $ranker = SPH_RANK_WORDCOUNT;
+                    break;
+                case 'fieldmask':
+                    $ranker = SPH_RANK_FIELDMASK;
+                    break;
+                case 'sph04':
+                    $ranker = SPH_RANK_SPH04;
+                    break;
+            }
+            break;
+        default:
+            $q .= $args[$i] . ' ';
     }
 }
 
