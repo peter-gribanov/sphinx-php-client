@@ -83,7 +83,7 @@ for ( $i=0; $i<count($args); $i++ )
 	else if ( $arg=="-d" || $arg=="--distinct" )	$distinct = $args[++$i];
 	else if ( $arg=="-l" || $arg=="--limit" )		$limit = (int)$args[++$i];
 	else if ( $arg=="--select" )					$select = $args[++$i];
-	else if ( $arg=="-fr"|| $arg=="--filterrange" )	$cl->SetFilterRange ( $args[++$i], $args[++$i], $args[++$i] );
+	else if ( $arg=="-fr"|| $arg=="--filterrange" )	$cl->setFilterRange ( $args[++$i], $args[++$i], $args[++$i] );
 	else if ( $arg=="-r" )
 	{
 		$arg = strtolower($args[++$i]);
@@ -101,19 +101,19 @@ for ( $i=0; $i<count($args); $i++ )
 // do query
 ////////////
 
-$cl->SetServer ( $host, $port );
-$cl->SetConnectTimeout ( 1 );
-$cl->SetArrayResult ( true );
-$cl->SetMatchMode ( $mode );
-if ( count($filtervals) )	$cl->SetFilter ( $filter, $filtervals );
-if ( $groupby )				$cl->SetGroupBy ( $groupby, SPH_GROUPBY_ATTR, $groupsort );
-if ( $sortby )				$cl->SetSortMode ( SPH_SORT_EXTENDED, $sortby );
-if ( $sortexpr )			$cl->SetSortMode ( SPH_SORT_EXPR, $sortexpr );
-if ( $distinct )			$cl->SetGroupDistinct ( $distinct );
-if ( $select )				$cl->SetSelect ( $select );
-if ( $limit )				$cl->SetLimits ( 0, $limit, ( $limit>1000 ) ? $limit : 1000 );
-$cl->SetRankingMode ( $ranker );
-$res = $cl->Query ( $q, $index );
+$cl->setServer ( $host, $port );
+$cl->setConnectTimeout ( 1 );
+$cl->setArrayResult ( true );
+$cl->setMatchMode ( $mode );
+if ( count($filtervals) )	$cl->setFilter ( $filter, $filtervals );
+if ( $groupby )				$cl->setGroupBy ( $groupby, SPH_GROUPBY_ATTR, $groupsort );
+if ( $sortby )				$cl->setSortMode ( SPH_SORT_EXTENDED, $sortby );
+if ( $sortexpr )			$cl->setSortMode ( SPH_SORT_EXPR, $sortexpr );
+if ( $distinct )			$cl->setGroupDistinct ( $distinct );
+if ( $select )				$cl->setSelect ( $select );
+if ( $limit )				$cl->setLimits ( 0, $limit, ( $limit>1000 ) ? $limit : 1000 );
+$cl->setRankingMode ( $ranker );
+$res = $cl->query ( $q, $index );
 
 ////////////////
 // print me out
@@ -121,12 +121,12 @@ $res = $cl->Query ( $q, $index );
 
 if ( $res===false )
 {
-	print "Query failed: " . $cl->GetLastError() . ".\n";
+	print "Query failed: " . $cl->getLastError() . ".\n";
 
 } else
 {
-	if ( $cl->GetLastWarning() )
-		print "WARNING: " . $cl->GetLastWarning() . "\n\n";
+	if ( $cl->getLastWarning() )
+		print "WARNING: " . $cl->getLastWarning() . "\n\n";
 
 	print "Query '$q' retrieved $res[total] of $res[total_found] matches in $res[time] sec.\n";
 	print "Query stats:\n";

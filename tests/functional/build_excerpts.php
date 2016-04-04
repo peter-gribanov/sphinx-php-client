@@ -28,10 +28,10 @@ foreach ( array(0,1) as $exact )
 	$opts["exact_phrase"] = $exact;
 	print "exact_phrase=$exact\n";
 	$cl = new SphinxClient ();
-	$res = $cl->BuildExcerpts ( $docs, $index, $words, $opts );
+	$res = $cl->buildExcerpts ( $docs, $index, $words, $opts );
 	if ( !$res )
 	{
-		die ( "ERROR: " . $cl->GetLastError() . ".\n" );
+		die ( "ERROR: " . $cl->getLastError() . ".\n" );
 	} else
 	{
 		$n = 0;
