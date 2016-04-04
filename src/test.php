@@ -167,27 +167,27 @@ $res = $cl->query($q, $index);
 ////////////////
 
 if ($res === false) {
-    print 'Query failed: ' . $cl->getLastError() . ".\n";
+    printf('Query failed: %s.' . PHP_EOL, $cl->getLastError());
 
 } else {
     if ($cl->getLastWarning()) {
-        print 'WARNING: ' . $cl->getLastWarning() . "\n\n";
+        printf('WARNING: %s' . PHP_EOL . PHP_EOL, $cl->getLastWarning());
     }
 
-    print "Query '$q' retrieved $res[total] of $res[total_found] matches in $res[time] sec.\n";
-    print "Query stats:\n";
+    print "Query '$q' retrieved {$res['total']} of {$res['total_found']} matches in {$res['time']} sec.\n";
+    print 'Query stats:' . PHP_EOL;
     if (is_array($res['words'])) {
         foreach ($res['words'] as $word => $info) {
-            print "    '$word' found $info[hits] times in $info[docs] documents\n";
+            print "    '$word' found {$info['hits']} times in {$info['docs']} documents\n";
         }
     }
-    print "\n";
+    print PHP_EOL;
 
     if (is_array($res['matches'])) {
         $n = 1;
-        print "Matches:\n";
+        print 'Matches:' . PHP_EOL;
         foreach ($res['matches'] as $docinfo) {
-            print "$n. doc_id=$docinfo[id], weight=$docinfo[weight]";
+            print "$n. doc_id={$docinfo['id']}, weight={$docinfo['weight']}";
             foreach ($res['attrs'] as $attrname => $attrtype) {
                 $value = $docinfo['attrs'][$attrname];
                 if ($attrtype == SPH_ATTR_MULTI || $attrtype == SPH_ATTR_MULTI64) {
@@ -197,7 +197,7 @@ if ($res === false) {
                 }
                 print ", $attrname=$value";
             }
-            print "\n";
+            print PHP_EOL;
             $n++;
         }
     }
