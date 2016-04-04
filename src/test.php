@@ -18,25 +18,25 @@ unset($_SERVER['argv'][0]);
 
 // build query
 if (!is_array($_SERVER['argv']) || empty($_SERVER['argv'])) {
-	print("Usage: php -f test.php [OPTIONS] query words\n\n");
-	print("Options are:\n");
-	print("-h, --host <HOST>\tconnect to searchd at host HOST\n");
-	print("-p, --port\t\tconnect to searchd at port PORT\n");
-	print("-i, --index <IDX>\tsearch through index(es) specified by IDX\n");
-	print("-s, --sortby <CLAUSE>\tsort matches by 'CLAUSE' in sort_extended mode\n");
-	print("-S, --sortexpr <EXPR>\tsort matches by 'EXPR' DESC in sort_expr mode\n");
-	print("-a, --any\t\tuse 'match any word' matching mode\n");
-	print("-b, --boolean\t\tuse 'boolean query' matching mode\n");
-	print("-e, --extended\t\tuse 'extended query' matching mode\n");
-	print("-ph,--phrase\t\tuse 'exact phrase' matching mode\n");
-	print("-f, --filter <ATTR>\tfilter by attribute 'ATTR' (default is 'group_id')\n");
-	print("-fr,--filterrange <ATTR> <MIN> <MAX>\n\t\t\tadd specified range filter\n");
-	print("-v, --value <VAL>\tadd VAL to allowed 'group_id' values list\n");
-	print("-g, --groupby <EXPR>\tgroup matches by 'EXPR'\n");
-	print("-gs,--groupsort <EXPR>\tsort groups by 'EXPR'\n");
-	print("-d, --distinct <ATTR>\tcount distinct values of 'ATTR''\n");
-	print("-l, --limit <COUNT>\tretrieve COUNT matches (default: 20)\n");
-	print("--select <EXPRLIST>\tuse 'EXPRLIST' as select-list (default: *)\n");
+	print "Usage: php -f test.php [OPTIONS] query words\n\n";
+	print "Options are:\n";
+	print "-h, --host <HOST>\tconnect to searchd at host HOST\n";
+	print "-p, --port\t\tconnect to searchd at port PORT\n";
+	print "-i, --index <IDX>\tsearch through index(es) specified by IDX\n";
+	print "-s, --sortby <CLAUSE>\tsort matches by 'CLAUSE' in sort_extended mode\n";
+	print "-S, --sortexpr <EXPR>\tsort matches by 'EXPR' DESC in sort_expr mode\n";
+	print "-a, --any\t\tuse 'match any word' matching mode\n";
+	print "-b, --boolean\t\tuse 'boolean query' matching mode\n";
+	print "-e, --extended\t\tuse 'extended query' matching mode\n";
+	print "-ph,--phrase\t\tuse 'exact phrase' matching mode\n";
+	print "-f, --filter <ATTR>\tfilter by attribute 'ATTR' (default is 'group_id')\n";
+	print "-fr,--filterrange <ATTR> <MIN> <MAX>\n\t\t\tadd specified range filter\n";
+	print "-v, --value <VAL>\tadd VAL to allowed 'group_id' values list\n";
+	print "-g, --groupby <EXPR>\tgroup matches by 'EXPR'\n";
+	print "-gs,--groupsort <EXPR>\tsort groups by 'EXPR'\n";
+	print "-d, --distinct <ATTR>\tcount distinct values of 'ATTR''\n";
+	print "-l, --limit <COUNT>\tretrieve COUNT matches (default: 20)\n";
+	print "--select <EXPRLIST>\tuse 'EXPRLIST' as select-list (default: *)\n";
 	exit;
 }
 
