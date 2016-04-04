@@ -72,8 +72,9 @@ EOF;
     $limit = 20;
     $ranker = SPH_RANK_PROXIMITY_BM25;
     $select = '';
+    $count = count($args);
 
-    for ($i = 0; $i < count($args); $i++) {
+    for ($i = 0; $i < $count; $i++) {
         switch ($args[$i]) {
             case '-h':
             case '--host':
