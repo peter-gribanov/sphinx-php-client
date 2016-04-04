@@ -1655,7 +1655,8 @@ class SphinxClient
         $pos = 0;
         $res = array();
         $rlen = strlen($response);
-        for ($i = 0; $i < count($docs); $i++) {
+        $count = count($docs);
+        while ($count--) {
             list(, $len) = unpack('N*', substr($response, $pos, 4));
             $pos += 4;
 
