@@ -1,5 +1,6 @@
 {
   "name": "sphinx/client",
+  "description": "Sphinx API client",
   "license": "GPL-3.0",
   "type": "library",
   "autoload": {
