@@ -807,7 +807,7 @@ class SphinxClient
 
     /// bind per-field weights by order
     /// DEPRECATED; use SetFieldWeights() instead
-    public function setWeights($weights)
+    public function setWeights()
     {
         throw new \RuntimeException('This method is now deprecated; please use SetFieldWeights instead');
     }
