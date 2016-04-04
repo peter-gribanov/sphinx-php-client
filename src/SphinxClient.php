@@ -462,7 +462,7 @@ class SphinxClient
     /////////////////////////////////////////////////////////////////////////////
 
     /// create a new client object and fill defaults
-    function SphinxClient()
+    public function __construct()
     {
         // per-client-object settings
         $this->host = 'localhost';
