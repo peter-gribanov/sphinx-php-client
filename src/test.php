@@ -11,13 +11,13 @@ $file = __DIR__.'/../vendor/autoload.php';
 //////////////////////
 
 // for very old PHP versions, like at my home test server
-if (is_array($argv) && !isset($_SERVER["argv"])) {
-	$_SERVER["argv"] = $argv;
+if (is_array($argv) && !isset($_SERVER['argv'])) {
+	$_SERVER['argv'] = $argv;
 }
-unset($_SERVER["argv"][0]);
+unset($_SERVER['argv'][0]);
 
 // build query
-if (!is_array($_SERVER["argv"]) || empty($_SERVER["argv"])) {
+if (!is_array($_SERVER['argv']) || empty($_SERVER['argv'])) {
 	print("Usage: php -f test.php [OPTIONS] query words\n\n");
 	print("Options are:\n");
 	print("-h, --host <HOST>\tconnect to searchd at host HOST\n");
@@ -41,61 +41,61 @@ if (!is_array($_SERVER["argv"]) || empty($_SERVER["argv"])) {
 }
 
 $args = array();
-foreach ($_SERVER["argv"] as $arg) {
+foreach ($_SERVER['argv'] as $arg) {
 	$args[] = $arg;
 }
 
 $cl = new SphinxClient();
 
-$q = "";
-$sql = "";
+$q = '';
+$sql = '';
 $mode = SPH_MATCH_ALL;
-$host = "localhost";
+$host = 'localhost';
 $port = 9312;
-$index = "*";
-$groupby = "";
-$groupsort = "@group desc";
-$filter = "group_id";
+$index = '*';
+$groupby = '';
+$groupsort = '@group desc';
+$filter = 'group_id';
 $filtervals = array();
-$distinct = "";
-$sortby = "";
-$sortexpr = "";
+$distinct = '';
+$sortby = '';
+$sortexpr = '';
 $limit = 20;
 $ranker = SPH_RANK_PROXIMITY_BM25;
-$select = "";
+$select = '';
 for($i=0; $i<count($args); $i++)
 {
 	$arg = $args[$i];
 
-	if ($arg=="-h" || $arg=="--host")				$host = $args[++$i];
-	elseif ($arg=="-p" || $arg=="--port")		$port = (int)$args[++$i];
-	elseif ($arg=="-i" || $arg=="--index")		$index = $args[++$i];
-	elseif ($arg=="-s" || $arg=="--sortby")		{ $sortby = $args[++$i]; $sortexpr = ""; }
-	elseif ($arg=="-S" || $arg=="--sortexpr")	{ $sortexpr = $args[++$i]; $sortby = ""; }
-	elseif ($arg=="-a" || $arg=="--any")			$mode = SPH_MATCH_ANY;
-	elseif ($arg=="-b" || $arg=="--boolean")		$mode = SPH_MATCH_BOOLEAN;
-	elseif ($arg=="-e" || $arg=="--extended")	$mode = SPH_MATCH_EXTENDED;
-	elseif ($arg=="-e2")							$mode = SPH_MATCH_EXTENDED2;
-	elseif ($arg=="-ph"|| $arg=="--phrase")		$mode = SPH_MATCH_PHRASE;
-	elseif ($arg=="-f" || $arg=="--filter")		$filter = $args[++$i];
-	elseif ($arg=="-v" || $arg=="--value")		$filtervals[] = $args[++$i];
-	elseif ($arg=="-g" || $arg=="--groupby")		$groupby = $args[++$i];
-	elseif ($arg=="-gs"|| $arg=="--groupsort")	$groupsort = $args[++$i];
-	elseif ($arg=="-d" || $arg=="--distinct")	$distinct = $args[++$i];
-	elseif ($arg=="-l" || $arg=="--limit")		$limit = (int)$args[++$i];
-	elseif ($arg=="--select")					$select = $args[++$i];
-	elseif ($arg=="-fr"|| $arg=="--filterrange")	$cl->setFilterRange($args[++$i], $args[++$i], $args[++$i]);
-	elseif ($arg=="-r")
+	if ($arg=='-h' || $arg=='--host')				$host = $args[++$i];
+	elseif ($arg=='-p' || $arg=='--port')		$port = (int)$args[++$i];
+	elseif ($arg=='-i' || $arg=='--index')		$index = $args[++$i];
+	elseif ($arg=='-s' || $arg=='--sortby')		{ $sortby = $args[++$i]; $sortexpr = ''; }
+	elseif ($arg=='-S' || $arg=='--sortexpr')	{ $sortexpr = $args[++$i]; $sortby = ''; }
+	elseif ($arg=='-a' || $arg=='--any')			$mode = SPH_MATCH_ANY;
+	elseif ($arg=='-b' || $arg=='--boolean')		$mode = SPH_MATCH_BOOLEAN;
+	elseif ($arg=='-e' || $arg=='--extended')	$mode = SPH_MATCH_EXTENDED;
+	elseif ($arg=='-e2')							$mode = SPH_MATCH_EXTENDED2;
+	elseif ($arg=='-ph'|| $arg=='--phrase')		$mode = SPH_MATCH_PHRASE;
+	elseif ($arg=='-f' || $arg=='--filter')		$filter = $args[++$i];
+	elseif ($arg=='-v' || $arg=='--value')		$filtervals[] = $args[++$i];
+	elseif ($arg=='-g' || $arg=='--groupby')		$groupby = $args[++$i];
+	elseif ($arg=='-gs'|| $arg=='--groupsort')	$groupsort = $args[++$i];
+	elseif ($arg=='-d' || $arg=='--distinct')	$distinct = $args[++$i];
+	elseif ($arg=='-l' || $arg=='--limit')		$limit = (int)$args[++$i];
+	elseif ($arg=='--select')					$select = $args[++$i];
+	elseif ($arg=='-fr'|| $arg=='--filterrange')	$cl->setFilterRange($args[++$i], $args[++$i], $args[++$i]);
+	elseif ($arg=='-r')
 	{
 		$arg = strtolower($args[++$i]);
-		if ($arg=="bm25")		$ranker = SPH_RANK_BM25;
-		if ($arg=="none")		$ranker = SPH_RANK_NONE;
-		if ($arg=="wordcount")$ranker = SPH_RANK_WORDCOUNT;
-		if ($arg=="fieldmask")$ranker = SPH_RANK_FIELDMASK;
-		if ($arg=="sph04")	$ranker = SPH_RANK_SPH04;
+		if ($arg=='bm25')		$ranker = SPH_RANK_BM25;
+		if ($arg=='none')		$ranker = SPH_RANK_NONE;
+		if ($arg=='wordcount')$ranker = SPH_RANK_WORDCOUNT;
+		if ($arg=='fieldmask')$ranker = SPH_RANK_FIELDMASK;
+		if ($arg=='sph04')	$ranker = SPH_RANK_SPH04;
 	}
 	else
-		$q .= $args[$i] . " ";
+		$q .= $args[$i] . ' ';
 }
 
 ////////////
@@ -122,37 +122,37 @@ $res = $cl->query($q, $index);
 
 if ($res===false)
 {
-	print "Query failed: " . $cl->getLastError() . ".\n";
+	print 'Query failed: ' . $cl->getLastError() . ".\n";
 
 } else
 {
 	if ($cl->getLastWarning())
-		print "WARNING: " . $cl->getLastWarning() . "\n\n";
+		print 'WARNING: ' . $cl->getLastWarning() . "\n\n";
 
 	print "Query '$q' retrieved $res[total] of $res[total_found] matches in $res[time] sec.\n";
 	print "Query stats:\n";
-	if (is_array($res["words"]))
-		foreach($res["words"] as $word => $info)
+	if (is_array($res['words']))
+		foreach($res['words'] as $word => $info)
 			print "    '$word' found $info[hits] times in $info[docs] documents\n";
 	print "\n";
 
-	if (is_array($res["matches"]))
+	if (is_array($res['matches']))
 	{
 		$n = 1;
 		print "Matches:\n";
-		foreach($res["matches"] as $docinfo)
+		foreach($res['matches'] as $docinfo)
 		{
 			print "$n. doc_id=$docinfo[id], weight=$docinfo[weight]";
-			foreach($res["attrs"] as $attrname => $attrtype)
+			foreach($res['attrs'] as $attrname => $attrtype)
 			{
-				$value = $docinfo["attrs"][$attrname];
+				$value = $docinfo['attrs'][$attrname];
 				if ($attrtype==SPH_ATTR_MULTI || $attrtype==SPH_ATTR_MULTI64)
 				{
-					$value = "(" . join(",", $value) .")";
+					$value = '(' . join(',', $value) .')';
 				} else
 				{
 					if ($attrtype==SPH_ATTR_TIMESTAMP)
-						$value = date("Y-m-d H:i:s", $value);
+						$value = date('Y-m-d H:i:s', $value);
 				}
 				print ", $attrname=$value";
 			}
