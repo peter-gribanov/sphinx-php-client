@@ -153,7 +153,7 @@ function sphPackI64($v)
 	if (is_int($v))
 		return pack("NN", $v < 0 ? -1 : 0, $v);
 
-	// x32, bcmath	
+	// x32, bcmath
 	if (function_exists("bcmul"))
 	{
 		if (bccomp($v, 0) == -1)
@@ -348,7 +348,7 @@ function sphUnpackI64($v)
 		$lo = ~$lo;
 		$c = 1;
 		$neg = "-";
-	}	
+	}
 
 	$hi = sprintf("%u", $hi);
 	$lo = sprintf("%u", $lo);
@@ -413,33 +413,33 @@ function sphSetBit($flag, $bit, $on)
 /// sphinx searchd client class
 class SphinxClient
 {
-	var $_host;			///< searchd host (default is "localhost")
-	var $_port;			///< searchd port (default is 9312)
-	var $_offset;		///< how many records to seek from result-set start (default is 0)
-	var $_limit;		///< how many records to return from result-set starting at offset (default is 20)
-	var $_mode;			///< query matching mode (default is SPH_MATCH_EXTENDED2)
-	var $_weights;		///< per-field weights (default is 1 for all fields)
-	var $_sort;			///< match sorting mode (default is SPH_SORT_RELEVANCE)
-	var $_sortby;		///< attribute to sort by (defualt is "")
-	var $_min_id;		///< min ID to match (default is 0, which means no limit)
-	var $_max_id;		///< max ID to match (default is 0, which means no limit)
-	var $_filters;		///< search filters
-	var $_groupby;		///< group-by attribute name
-	var $_groupfunc;	///< group-by function (to pre-process group-by attribute value with)
-	var $_groupsort;	///< group-by sorting clause (to sort groups in result set with)
-	var $_groupdistinct;///< group-by count-distinct attribute
-	var $_maxmatches;	///< max matches to retrieve
-	var $_cutoff;		///< cutoff to stop searching at (default is 0)
-	var $_retrycount;	///< distributed retries count
-	var $_retrydelay;	///< distributed retries delay
-	var $_anchor;		///< geographical anchor point
-	var $_indexweights;	///< per-index weights
-	var $_ranker;		///< ranking mode (default is SPH_RANK_PROXIMITY_BM25)
-	var $_rankexpr;		///< ranking mode expression (for SPH_RANK_EXPR)
-	var $_maxquerytime;	///< max query time, milliseconds (default is 0, do not limit)
-	var $_fieldweights;	///< per-field-name weights
-	var $_overrides;	///< per-query attribute values overrides
-	var $_select;		///< select-list (attributes or expressions, with optional aliases)
+	var $_host; ///< searchd host (default is "localhost")
+	var $_port; ///< searchd port (default is 9312)
+	var $_offset; ///< how many records to seek from result-set start (default is 0)
+	var $_limit; ///< how many records to return from result-set starting at offset (default is 20)
+	var $_mode; ///< query matching mode (default is SPH_MATCH_EXTENDED2)
+	var $_weights; ///< per-field weights (default is 1 for all fields)
+	var $_sort; ///< match sorting mode (default is SPH_SORT_RELEVANCE)
+	var $_sortby; ///< attribute to sort by (defualt is "")
+	var $_min_id; ///< min ID to match (default is 0, which means no limit)
+	var $_max_id; ///< max ID to match (default is 0, which means no limit)
+	var $_filters; ///< search filters
+	var $_groupby; ///< group-by attribute name
+	var $_groupfunc; ///< group-by function (to pre-process group-by attribute value with)
+	var $_groupsort; ///< group-by sorting clause (to sort groups in result set with)
+	var $_groupdistinct; ///< group-by count-distinct attribute
+	var $_maxmatches; ///< max matches to retrieve
+	var $_cutoff; ///< cutoff to stop searching at (default is 0)
+	var $_retrycount; ///< distributed retries count
+	var $_retrydelay; ///< distributed retries delay
+	var $_anchor; ///< geographical anchor point
+	var $_indexweights; ///< per-index weights
+	var $_ranker; ///< ranking mode (default is SPH_RANK_PROXIMITY_BM25)
+	var $_rankexpr; ///< ranking mode expression (for SPH_RANK_EXPR)
+	var $_maxquerytime; ///< max query time, milliseconds (default is 0, do not limit)
+	var $_fieldweights; ///< per-field-name weights
+	var $_overrides; ///< per-query attribute values overrides
+	var $_select; ///< select-list (attributes or expressions, with optional aliases)
 	var $_query_flags; ///< per-query various flags
 	var $_predictedtime; ///< per-query max_predicted_time
 	var $_outerorderby; ///< outer match sort by
@@ -447,14 +447,14 @@ class SphinxClient
 	var $_outerlimit; ///< outer limit
 	var $_hasouter;
 
-	var $_error;		///< last error message
-	var $_warning;		///< last warning message
-	var $_connerror;		///< connection error vs remote error flag
+	var $_error; ///< last error message
+	var $_warning; ///< last warning message
+	var $_connerror; ///< connection error vs remote error flag
 
-	var $_reqs;			///< requests array for multi-query
-	var $_mbenc;		///< stored mbstring encoding
-	var $_arrayresult;	///< whether $result["matches"] should be a hash or an array
-	var $_timeout;		///< connect timeout
+	var $_reqs; ///< requests array for multi-query
+	var $_mbenc; ///< stored mbstring encoding
+	var $_arrayresult; ///< whether $result["matches"] should be a hash or an array
+	var $_timeout; ///< connect timeout
 
 	/////////////////////////////////////////////////////////////////////////////
 	// common stuff
@@ -464,37 +464,37 @@ class SphinxClient
 	function SphinxClient ()
 	{
 		// per-client-object settings
-		$this->_host		= "localhost";
-		$this->_port		= 9312;
-		$this->_path		= false;
-		$this->_socket		= false;
+		$this->_host = "localhost";
+		$this->_port = 9312;
+		$this->_path = false;
+		$this->_socket = false;
 
 		// per-query settings
-		$this->_offset		= 0;
-		$this->_limit		= 20;
-		$this->_mode		= SPH_MATCH_EXTENDED2;
-		$this->_weights		= array ();
-		$this->_sort		= SPH_SORT_RELEVANCE;
-		$this->_sortby		= "";
-		$this->_min_id		= 0;
-		$this->_max_id		= 0;
-		$this->_filters		= array ();
-		$this->_groupby		= "";
-		$this->_groupfunc	= SPH_GROUPBY_DAY;
-		$this->_groupsort	= "@group desc";
-		$this->_groupdistinct= "";
-		$this->_maxmatches	= 1000;
-		$this->_cutoff		= 0;
-		$this->_retrycount	= 0;
-		$this->_retrydelay	= 0;
-		$this->_anchor		= array ();
-		$this->_indexweights= array ();
-		$this->_ranker		= SPH_RANK_PROXIMITY_BM25;
-		$this->_rankexpr	= "";
-		$this->_maxquerytime= 0;
-		$this->_fieldweights= array();
-		$this->_overrides 	= array();
-		$this->_select		= "*";
+		$this->_offset = 0;
+		$this->_limit = 20;
+		$this->_mode = SPH_MATCH_EXTENDED2;
+		$this->_weights = array ();
+		$this->_sort = SPH_SORT_RELEVANCE;
+		$this->_sortby = "";
+		$this->_min_id = 0;
+		$this->_max_id = 0;
+		$this->_filters = array ();
+		$this->_groupby = "";
+		$this->_groupfunc = SPH_GROUPBY_DAY;
+		$this->_groupsort = "@group desc";
+		$this->_groupdistinct = "";
+		$this->_maxmatches = 1000;
+		$this->_cutoff = 0;
+		$this->_retrycount = 0;
+		$this->_retrydelay = 0;
+		$this->_anchor = array ();
+		$this->_indexweights = array ();
+		$this->_ranker = SPH_RANK_PROXIMITY_BM25;
+		$this->_rankexpr = "";
+		$this->_maxquerytime = 0;
+		$this->_fieldweights = array();
+		$this->_overrides = array();
+		$this->_select = "*";
 		$this->_query_flags = sphSetBit(0, 6, true); // default idf=tfidf_normalized
 		$this->_predictedtime = 0;
 		$this->_outerorderby = "";
@@ -502,14 +502,14 @@ class SphinxClient
 		$this->_outerlimit = 0;
 		$this->_hasouter = false;
 
-		$this->_error		= ""; // per-reply fields (for single-query case)
-		$this->_warning		= "";
-		$this->_connerror	= false;
+		$this->_error = ""; // per-reply fields (for single-query case)
+		$this->_warning = "";
+		$this->_connerror = false;
 
-		$this->_reqs		= array ();	// requests storage (for multi-query case)
-		$this->_mbenc		= "";
-		$this->_arrayresult	= false;
-		$this->_timeout		= 0;
+		$this->_reqs = array ();// requests storage (for multi-query case)
+		$this->_mbenc = "";
+		$this->_arrayresult = false;
+		$this->_timeout = 0;
 	}
 
 	function __destruct()
@@ -987,16 +987,16 @@ class SphinxClient
 		assert(isset($flag_name, $known_names));
 		assert(in_array( $flag_value, $flags[$flag_name], true) ||($flag_name=="max_predicted_time" && is_int($flag_value) && $flag_value>=0));
 		
-		if ($flag_name=="reverse_scan")	$this->_query_flags = sphSetBit($this->_query_flags, 0, $flag_value==1);
-		if ($flag_name=="sort_method")	$this->_query_flags = sphSetBit($this->_query_flags, 1, $flag_value=="kbuffer");
+		if ($flag_name=="reverse_scan") $this->_query_flags = sphSetBit($this->_query_flags, 0, $flag_value==1);
+		if ($flag_name=="sort_method") $this->_query_flags = sphSetBit($this->_query_flags, 1, $flag_value=="kbuffer");
 		if ($flag_name=="max_predicted_time")
 		{
 			$this->_query_flags = sphSetBit($this->_query_flags, 2, $flag_value>0);
 			$this->_predictedtime = (int)$flag_value;
 		}
-		if ($flag_name=="boolean_simplify")	$this->_query_flags = sphSetBit($this->_query_flags, 3, $flag_value);
-		if ($flag_name=="idf" &&($flag_value=="normalized" || $flag_value=="plain"))	$this->_query_flags = sphSetBit($this->_query_flags, 4, $flag_value=="plain");
-		if ($flag_name=="global_idf")	$this->_query_flags = sphSetBit($this->_query_flags, 5, $flag_value);
+		if ($flag_name=="boolean_simplify") $this->_query_flags = sphSetBit($this->_query_flags, 3, $flag_value);
+		if ($flag_name=="idf" &&($flag_value=="normalized" || $flag_value=="plain")) $this->_query_flags = sphSetBit($this->_query_flags, 4, $flag_value=="plain");
+		if ($flag_name=="global_idf") $this->_query_flags = sphSetBit($this->_query_flags, 5, $flag_value);
 		if ($flag_name=="idf" &&($flag_value=="tfidf_normalized" || $flag_value=="tfidf_unnormalized"))	$this->_query_flags = sphSetBit($this->_query_flags, 6, $flag_value=="tfidf_normalized");
 		if ($flag_name=="low_priority") $this->_query_flags = sphSetBit($this->_query_flags, 8, $flag_value);
 	}
@@ -1029,10 +1029,10 @@ class SphinxClient
 	/// clear groupby settings (for multi-queries)
 	function ResetGroupBy ()
 	{
-		$this->_groupby		= "";
-		$this->_groupfunc	= SPH_GROUPBY_DAY;
-		$this->_groupsort	= "@group desc";
-		$this->_groupdistinct= "";
+		$this->_groupby = "";
+		$this->_groupfunc = SPH_GROUPBY_DAY;
+		$this->_groupsort = "@group desc";
+		$this->_groupdistinct 	= "";
 	}
 
 	/// clear all attribute value overrides (for multi-queries)
@@ -1189,9 +1189,9 @@ class SphinxClient
 				$req .= sphPackU64($id);
 				switch ($entry["type"])
 				{
-					case SPH_ATTR_FLOAT:	$req .= $this->_PackFloat($val); break;
-					case SPH_ATTR_BIGINT:	$req .= sphPackI64($val); break;
-					default:				$req .= pack("N", $val); break;
+					case SPH_ATTR_FLOAT:  $req .= $this->_PackFloat($val); break;
+					case SPH_ATTR_BIGINT: $req .= sphPackI64($val); break;
+					default:              $req .= pack("N", $val); break;
 				}
 			}
 		}
@@ -1386,11 +1386,11 @@ class SphinxClient
 					} else if ($type==SPH_ATTR_STRING)
 					{
 						$attrvals[$attr] = substr($response, $p, $val);
-						$p += $val;						
+						$p += $val;
 					} else if ($type==SPH_ATTR_FACTORS)
 					{
 						$attrvals[$attr] = substr($response, $p, $val-4);
-						$p += $val-4;						
+						$p += $val-4;
 					} else
 					{
 						$attrvals[$attr] = sphFixUint($val);
@@ -1451,26 +1451,26 @@ class SphinxClient
 		// fixup options
 		/////////////////
 
-		if (!isset($opts["before_match"]))		$opts["before_match"] = "<b>";
-		if (!isset($opts["after_match"]))			$opts["after_match"] = "</b>";
-		if (!isset($opts["chunk_separator"]))		$opts["chunk_separator"] = " ... ";
-		if (!isset($opts["limit"]))				$opts["limit"] = 256;
-		if (!isset($opts["limit_passages"]))		$opts["limit_passages"] = 0;
-		if (!isset($opts["limit_words"]))			$opts["limit_words"] = 0;
-		if (!isset($opts["around"]))				$opts["around"] = 5;
-		if (!isset($opts["exact_phrase"]))		$opts["exact_phrase"] = false;
-		if (!isset($opts["single_passage"]))		$opts["single_passage"] = false;
-		if (!isset($opts["use_boundaries"]))		$opts["use_boundaries"] = false;
-		if (!isset($opts["weight_order"]))		$opts["weight_order"] = false;
-		if (!isset($opts["query_mode"]))			$opts["query_mode"] = false;
-		if (!isset($opts["force_all_words"]))		$opts["force_all_words"] = false;
-		if (!isset($opts["start_passage_id"]))	$opts["start_passage_id"] = 1;
-		if (!isset($opts["load_files"]))			$opts["load_files"] = false;
-		if (!isset($opts["html_strip_mode"]))		$opts["html_strip_mode"] = "index";
-		if (!isset($opts["allow_empty"]))			$opts["allow_empty"] = false;
-		if (!isset($opts["passage_boundary"]))	$opts["passage_boundary"] = "none";
-		if (!isset($opts["emit_zones"]))			$opts["emit_zones"] = false;
-		if (!isset($opts["load_files_scattered"]))		$opts["load_files_scattered"] = false;
+		if (!isset($opts["before_match"])) $opts["before_match"] = "<b>";
+		if (!isset($opts["after_match"])) $opts["after_match"] = "</b>";
+		if (!isset($opts["chunk_separator"])) $opts["chunk_separator"] = " ... ";
+		if (!isset($opts["limit"])) $opts["limit"] = 256;
+		if (!isset($opts["limit_passages"])) $opts["limit_passages"] = 0;
+		if (!isset($opts["limit_words"])) $opts["limit_words"] = 0;
+		if (!isset($opts["around"])) $opts["around"] = 5;
+		if (!isset($opts["exact_phrase"])) $opts["exact_phrase"] = false;
+		if (!isset($opts["single_passage"])) $opts["single_passage"] = false;
+		if (!isset($opts["use_boundaries"])) $opts["use_boundaries"] = false;
+		if (!isset($opts["weight_order"])) $opts["weight_order"] = false;
+		if (!isset($opts["query_mode"])) $opts["query_mode"] = false;
+		if (!isset($opts["force_all_words"])) $opts["force_all_words"] = false;
+		if (!isset($opts["start_passage_id"])) $opts["start_passage_id"] = 1;
+		if (!isset($opts["load_files"])) $opts["load_files"] = false;
+		if (!isset($opts["html_strip_mode"])) $opts["html_strip_mode"] = "index";
+		if (!isset($opts["allow_empty"])) $opts["allow_empty"] = false;
+		if (!isset($opts["passage_boundary"])) $opts["passage_boundary"] = "none";
+		if (!isset($opts["emit_zones"])) $opts["emit_zones"] = false;
+		if (!isset($opts["load_files_scattered"])) $opts["load_files_scattered"] = false;
 		
 
 		/////////////////
@@ -1479,16 +1479,16 @@ class SphinxClient
 
 		// v.1.2 req
 		$flags = 1; // remove spaces
-		if ($opts["exact_phrase"])	$flags |= 2;
-		if ($opts["single_passage"])	$flags |= 4;
-		if ($opts["use_boundaries"])	$flags |= 8;
-		if ($opts["weight_order"])	$flags |= 16;
-		if ($opts["query_mode"])		$flags |= 32;
-		if ($opts["force_all_words"])	$flags |= 64;
-		if ($opts["load_files"])		$flags |= 128;
-		if ($opts["allow_empty"])		$flags |= 256;
-		if ($opts["emit_zones"])		$flags |= 512;
-		if ($opts["load_files_scattered"])	$flags |= 1024;
+		if ($opts["exact_phrase"]) $flags |= 2;
+		if ($opts["single_passage"]) $flags |= 4;
+		if ($opts["use_boundaries"]) $flags |= 8;
+		if ($opts["weight_order"]) $flags |= 16;
+		if ($opts["query_mode"]) $flags |= 32;
+		if ($opts["force_all_words"]) $flags |= 64;
+		if ($opts["load_files"]) $flags |= 128;
+		if ($opts["allow_empty"]) $flags |= 256;
+		if ($opts["emit_zones"]) $flags |= 512;
+		if ($opts["load_files_scattered"]) $flags |= 1024;
 		$req = pack("NN", 0, $flags); // mode=0, flags=$flags
 		$req .= pack("N", strlen($index)) . $index; // req index
 		$req .= pack("N", strlen($words)) . $words; // req words
@@ -1604,11 +1604,11 @@ class SphinxClient
 		$pos += 4;
 		for($i=0; $i<$nwords; $i++)
 		{
-			list(,$len) = unpack("N*", substr($response, $pos, 4));	$pos += 4;
+			list(,$len) = unpack("N*", substr($response, $pos, 4)); $pos += 4;
 			$tokenized = $len ? substr($response, $pos, $len) : "";
 			$pos += $len;
 
-			list(,$len) = unpack("N*", substr($response, $pos, 4));	$pos += 4;
+			list(,$len) = unpack("N*", substr($response, $pos, 4)); $pos += 4;
 			$normalized = $len ? substr($response, $pos, $len) : "";
 			$pos += $len;
 
