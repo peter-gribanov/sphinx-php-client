@@ -4,34 +4,34 @@
  * @link https://github.com/sphinxsearch/sphinx/blob/master/api/test2.php
  */
 
-require __DIR__.'/../../src/SphinxClient.php';
+$file = __DIR__.'/../../vendor/autoload.php';
 
 $docs = array
 (
-	"this is my test text to be highlighted, and for the sake of the testing we need to pump its length somewhat",
-	"another test text to be highlighted, below limit",
-	"test number three, without phrase match",
-	"final test, not only without phrase match, but also above limit and with swapped phrase text test as well",
+	'this is my test text to be highlighted, and for the sake of the testing we need to pump its length somewhat',
+	'another test text to be highlighted, below limit',
+	'test number three, without phrase match',
+	'final test, not only without phrase match, but also above limit and with swapped phrase text test as well',
 );
-$words = "test text";
-$index = "test1";
+$words = 'test text';
+$index = 'test1';
 $opts = array
 (
-	"before_match"		=> "<b>",
-	"after_match"		=> "</b>",
-	"chunk_separator"	=> " ... ",
-	"limit"				=> 60,
-	"around"			=> 3,
+	'before_match'		=> '<b>',
+	'after_match'		=> '</b>',
+	'chunk_separator'	=> ' ... ',
+	'limit'				=> 60,
+	'around'			=> 3,
 );
 foreach ( array(0,1) as $exact )
 {
-	$opts["exact_phrase"] = $exact;
+	$opts['exact_phrase'] = $exact;
 	print "exact_phrase=$exact\n";
 	$cl = new SphinxClient ();
 	$res = $cl->buildExcerpts ( $docs, $index, $words, $opts );
 	if ( !$res )
 	{
-		die ( "ERROR: " . $cl->getLastError() . ".\n" );
+		die ( 'ERROR: ' . $cl->getLastError() . ".\n" );
 	} else
 	{
 		$n = 0;
@@ -43,7 +43,3 @@ foreach ( array(0,1) as $exact )
 		print "\n";
 	}
 }
-
-//
-// $Id$
-//
