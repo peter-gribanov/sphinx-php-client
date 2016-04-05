@@ -316,9 +316,9 @@ class Client
     protected $timeout = 0;
 
     /**
-     * @var bool
+     * @var string
      */
-    protected $path = false;
+    protected $path = '';
 
     /**
      * @var resource|bool
