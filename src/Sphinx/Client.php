@@ -532,10 +532,10 @@ class Client
      */
     protected function connect()
     {
-        if ($this->socket !== false) {
+        if (is_resource($this->socket)) {
             // we are in persistent connection mode, so we have a socket
             // however, need to check whether it's still alive
-            if (!@feof($this->socket)) {
+            if (!feof($this->socket)) {
                 return $this->socket;
             }
 
