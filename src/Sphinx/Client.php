@@ -476,7 +476,7 @@ class Client
     /**
      * Set server connection timeout (0 to remove)
      *
-     * @param int|float $timeout
+     * @param int|float|string $timeout
      */
     public function setConnectTimeout($timeout)
     {
@@ -893,8 +893,8 @@ class Client
      * Only match records if $attribute value is beetwen $min and $max (inclusive)
      *
      * @param string $attribute
-     * @param int $min
-     * @param int $max
+     * @param float $min
+     * @param float $max
      * @param bool $exclude
      */
     public function setFilterFloatRange($attribute, $min, $max, $exclude = false)
