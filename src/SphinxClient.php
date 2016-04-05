@@ -32,7 +32,7 @@
 // PHP version of Sphinx searchd client (PHP API)
 /////////////////////////////////////////////////////////////////////////////
 
-/// known searchd commands
+// known searchd commands
 define('SEARCHD_COMMAND_SEARCH',     0);
 define('SEARCHD_COMMAND_EXCERPT',    1);
 define('SEARCHD_COMMAND_UPDATE',     2);
@@ -41,7 +41,7 @@ define('SEARCHD_COMMAND_PERSIST',    4);
 define('SEARCHD_COMMAND_STATUS',     5);
 define('SEARCHD_COMMAND_FLUSHATTRS', 7);
 
-/// current client-side command implementation versions
+// current client-side command implementation versions
 define('VER_COMMAND_SEARCH',     0x11E);
 define('VER_COMMAND_EXCERPT',    0x104);
 define('VER_COMMAND_UPDATE',     0x103);
@@ -50,13 +50,13 @@ define('VER_COMMAND_STATUS',     0x101);
 define('VER_COMMAND_QUERY',      0x100);
 define('VER_COMMAND_FLUSHATTRS', 0x100);
 
-/// known searchd status codes
+// known searchd status codes
 define('SEARCHD_OK',      0);
 define('SEARCHD_ERROR',   1);
 define('SEARCHD_RETRY',   2);
 define('SEARCHD_WARNING', 3);
 
-/// known match modes
+// known match modes
 define('SPH_MATCH_ALL',       0);
 define('SPH_MATCH_ANY',       1);
 define('SPH_MATCH_PHRASE',    2);
@@ -65,11 +65,11 @@ define('SPH_MATCH_EXTENDED',  4);
 define('SPH_MATCH_FULLSCAN',  5);
 define('SPH_MATCH_EXTENDED2', 6); // extended engine V2 (TEMPORARY, WILL BE REMOVED)
 
-/// known ranking modes (ext2 only)
-define('SPH_RANK_PROXIMITY_BM25', 0); ///< default mode, phrase proximity major factor and BM25 minor one
-define('SPH_RANK_BM25',           1); ///< statistical mode, BM25 ranking only (faster but worse quality)
-define('SPH_RANK_NONE',           2); ///< no ranking, all matches get a weight of 1
-define('SPH_RANK_WORDCOUNT',      3); ///< simple word-count weighting, rank is a weighted sum of per-field keyword occurence counts
+// known ranking modes (ext2 only)
+define('SPH_RANK_PROXIMITY_BM25', 0); // default mode, phrase proximity major factor and BM25 minor one
+define('SPH_RANK_BM25',           1); // statistical mode, BM25 ranking only (faster but worse quality)
+define('SPH_RANK_NONE',           2); // no ranking, all matches get a weight of 1
+define('SPH_RANK_WORDCOUNT',      3); // simple word-count weighting, rank is a weighted sum of per-field keyword occurence counts
 define('SPH_RANK_PROXIMITY',      4);
 define('SPH_RANK_MATCHANY',       5);
 define('SPH_RANK_FIELDMASK',      6);
@@ -77,7 +77,7 @@ define('SPH_RANK_SPH04',          7);
 define('SPH_RANK_EXPR',           8);
 define('SPH_RANK_TOTAL',          9);
 
-/// known sort modes
+// known sort modes
 define('SPH_SORT_RELEVANCE',     0);
 define('SPH_SORT_ATTR_DESC',     1);
 define('SPH_SORT_ATTR_ASC',      2);
@@ -85,13 +85,13 @@ define('SPH_SORT_TIME_SEGMENTS', 3);
 define('SPH_SORT_EXTENDED',      4);
 define('SPH_SORT_EXPR',          5);
 
-/// known filter types
+// known filter types
 define('SPH_FILTER_VALUES',     0);
 define('SPH_FILTER_RANGE',      1);
 define('SPH_FILTER_FLOATRANGE', 2);
 define('SPH_FILTER_STRING',     3);
 
-/// known attribute types
+// known attribute types
 define('SPH_ATTR_INTEGER',   1);
 define('SPH_ATTR_TIMESTAMP', 2);
 define('SPH_ATTR_ORDINAL',   3);
@@ -103,7 +103,7 @@ define('SPH_ATTR_FACTORS',   1001);
 define('SPH_ATTR_MULTI',     0x40000001);
 define('SPH_ATTR_MULTI64',   0x40000002);
 
-/// known grouping functions
+// known grouping functions
 define('SPH_GROUPBY_DAY',      0);
 define('SPH_GROUPBY_WEEK',     1);
 define('SPH_GROUPBY_MONTH',    2);
@@ -137,7 +137,6 @@ define('SPH_GROUPBY_ATTRPAIR', 5);
 //  - return ints if we can
 //  - otherwise format number into a string
 
-/// pack 64-bit signed
 function sphPackI64($v)
 {
     assert(is_numeric($v));
@@ -414,48 +413,48 @@ function sphSetBit($flag, $bit, $on)
 /// sphinx searchd client class
 class SphinxClient
 {
-    protected $host = 'localhost'; ///< searchd host (default is 'localhost')
-    protected $port = 9312; ///< searchd port (default is 9312)
-    protected $offset = 0; ///< how many records to seek from result-set start (default is 0)
-    protected $limit = 20; ///< how many records to return from result-set starting at offset (default is 20)
-    protected $mode = SPH_MATCH_EXTENDED2; ///< query matching mode (default is SPH_MATCH_EXTENDED2)
-    protected $weights = array(); ///< per-field weights (default is 1 for all fields)
-    protected $sort = SPH_SORT_RELEVANCE; ///< match sorting mode (default is SPH_SORT_RELEVANCE)
-    protected $sort_by = ''; ///< attribute to sort by (defualt is '')
-    protected $min_id = 0; ///< min ID to match (default is 0, which means no limit)
-    protected $max_id = 0; ///< max ID to match (default is 0, which means no limit)
-    protected $filters = array(); ///< search filters
-    protected $group_by = ''; ///< group-by attribute name
-    protected $group_func = SPH_GROUPBY_DAY; ///< group-by function (to pre-process group-by attribute value with)
-    protected $group_sort = '@group desc'; ///< group-by sorting clause (to sort groups in result set with)
-    protected $group_distinct = ''; ///< group-by count-distinct attribute
-    protected $max_matches = 1000; ///< max matches to retrieve
-    protected $cutoff = 0; ///< cutoff to stop searching at (default is 0)
-    protected $retry_count = 0; ///< distributed retries count
-    protected $retry_delay = 0; ///< distributed retries delay
-    protected $anchor = array(); ///< geographical anchor point
-    protected $index_weights = array(); ///< per-index weights
-    protected $ranker = SPH_RANK_PROXIMITY_BM25; ///< ranking mode (default is SPH_RANK_PROXIMITY_BM25)
-    protected $rank_expr = ''; ///< ranking mode expression (for SPH_RANK_EXPR)
-    protected $max_query_time = 0; ///< max query time, milliseconds (default is 0, do not limit)
-    protected $field_weights = array(); ///< per-field-name weights
-    protected $overrides = array(); ///< per-query attribute values overrides
-    protected $select = '*'; ///< select-list (attributes or expressions, with optional aliases)
-    protected $query_flags = 0; ///< per-query various flags
-    protected $predicted_time = 0; ///< per-query max_predicted_time
-    protected $outer_order_by = ''; ///< outer match sort by
-    protected $outer_offset = 0; ///< outer offset
-    protected $outer_limit = 0; ///< outer limit
+    protected $host = 'localhost'; // searchd host (default is 'localhost')
+    protected $port = 9312; // searchd port (default is 9312)
+    protected $offset = 0; // how many records to seek from result-set start (default is 0)
+    protected $limit = 20; // how many records to return from result-set starting at offset (default is 20)
+    protected $mode = SPH_MATCH_EXTENDED2; // query matching mode (default is SPH_MATCH_EXTENDED2)
+    protected $weights = array(); // per-field weights (default is 1 for all fields)
+    protected $sort = SPH_SORT_RELEVANCE; // match sorting mode (default is SPH_SORT_RELEVANCE)
+    protected $sort_by = ''; // attribute to sort by (defualt is '')
+    protected $min_id = 0; // min ID to match (default is 0, which means no limit)
+    protected $max_id = 0; // max ID to match (default is 0, which means no limit)
+    protected $filters = array(); // search filters
+    protected $group_by = ''; // group-by attribute name
+    protected $group_func = SPH_GROUPBY_DAY; // group-by function (to pre-process group-by attribute value with)
+    protected $group_sort = '@group desc'; // group-by sorting clause (to sort groups in result set with)
+    protected $group_distinct = ''; // group-by count-distinct attribute
+    protected $max_matches = 1000; // max matches to retrieve
+    protected $cutoff = 0; // cutoff to stop searching at (default is 0)
+    protected $retry_count = 0; // distributed retries count
+    protected $retry_delay = 0; // distributed retries delay
+    protected $anchor = array(); // geographical anchor point
+    protected $index_weights = array(); // per-index weights
+    protected $ranker = SPH_RANK_PROXIMITY_BM25; // ranking mode (default is SPH_RANK_PROXIMITY_BM25)
+    protected $rank_expr = ''; // ranking mode expression (for SPH_RANK_EXPR)
+    protected $max_query_time = 0; // max query time, milliseconds (default is 0, do not limit)
+    protected $field_weights = array(); // per-field-name weights
+    protected $overrides = array(); // per-query attribute values overrides
+    protected $select = '*'; // select-list (attributes or expressions, with optional aliases)
+    protected $query_flags = 0; // per-query various flags
+    protected $predicted_time = 0; // per-query max_predicted_time
+    protected $outer_order_by = ''; // outer match sort by
+    protected $outer_offset = 0; // outer offset
+    protected $outer_limit = 0; // outer limit
     protected $has_outer = false;
 
-    protected $error = ''; ///< last error message
-    protected $warning = ''; ///< last warning message
-    protected $conn_error = false; ///< connection error vs remote error flag
+    protected $error = ''; // last error message
+    protected $warning = ''; // last warning message
+    protected $conn_error = false; // connection error vs remote error flag
 
-    protected $reqs = array(); ///< requests array for multi-query
-    protected $mbenc = ''; ///< stored mbstring encoding
-    protected $array_result = false; ///< whether $result['matches'] should be a hash or an array
-    protected $timeout = 0; ///< connect timeout
+    protected $reqs = array(); // requests array for multi-query
+    protected $mbenc = ''; // stored mbstring encoding
+    protected $array_result = false; // whether $result['matches'] should be a hash or an array
+    protected $timeout = 0; // connect timeout
 
     protected $path = false;
     protected $socket = false;
