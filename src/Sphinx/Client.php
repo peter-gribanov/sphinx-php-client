@@ -561,7 +561,7 @@ class Client
             $fp = @fsockopen($host, $port, $errno, $errstr, $this->timeout);
         }
 
-        if (!$fp) {
+        if (!is_resource($fp)) {
             if ($this->path) {
                 $location = $this->path;
             } else {
@@ -942,7 +942,7 @@ class Client
      * Set grouping attribute and function
      *
      * @param string $attribute
-     * @param string $func
+     * @param int $func
      * @param string $group_sort
      */
     public function setGroupBy($attribute, $func, $group_sort = '@group desc')
@@ -1376,7 +1376,7 @@ class Client
         // mbstring workaround
         $this->mbPush();
 
-        if (!($fp = $this->connect())) {
+        if (($fp = $this->connect()) === false) {
             $this->mbPop();
             return false;
         }
@@ -1599,7 +1599,7 @@ class Client
 
         $this->mbPush();
 
-        if (!($fp = $this->connect())) {
+        if (($fp = $this->connect()) === false) {
             $this->mbPop();
             return false;
         }
@@ -1746,7 +1746,7 @@ class Client
 
         $this->mbPush();
 
-        if (!($fp = $this->connect())) {
+        if (($fp = $this->connect()) === false) {
             $this->mbPop();
             return false;
         }
@@ -1895,7 +1895,7 @@ class Client
         }
 
         // connect, send query, get response
-        if (!($fp = $this->connect())) {
+        if (($fp = $this->connect()) === false) {
             $this->mbPop();
             return -1;
         }
@@ -1931,7 +1931,7 @@ class Client
             $this->error = 'already connected';
             return false;
         }
-        if (!($fp = $this->connect()))
+        if (($fp = $this->connect()) === false)
             return false;
 
         // command, command version = 0, body length = 4, body = 1
@@ -1974,7 +1974,7 @@ class Client
         assert(is_bool($session));
 
         $this->mbPush();
-        if (!($fp = $this->connect())) {
+        if (($fp = $this->connect()) === false) {
             $this->mbPop();
             return false;
         }
@@ -2014,7 +2014,7 @@ class Client
     public function flushAttributes()
     {
         $this->mbPush();
-        if (!($fp = $this->connect())) {
+        if (($fp = $this->connect()) === false) {
             $this->mbPop();
             return -1;
         }
