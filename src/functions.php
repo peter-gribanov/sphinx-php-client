@@ -51,7 +51,7 @@ namespace Sphinx;
  *
  * @return string
  */
-function sphPackI64($value)
+function pack64IntSigned($value)
 {
     assert(is_numeric($value));
 
@@ -104,7 +104,7 @@ function sphPackI64($value)
  *
  * @return string
  */
-function sphPackU64($value)
+function pack64IntUnsigned($value)
 {
     assert(is_numeric($value));
 
@@ -168,7 +168,7 @@ function sphPackU64($value)
  *
  * @return string
  */
-function sphUnpackU64($value)
+function unpack64IntUnsigned($value)
 {
     list($hi, $lo) = array_values(unpack('N*N*', $value));
 
@@ -247,7 +247,7 @@ function sphUnpackU64($value)
  *
  * @return string
  */
-function sphUnpackI64($value)
+function unpack64IntSigned($value)
 {
     list($hi, $lo) = array_values(unpack('N*N*', $value));
 
@@ -320,7 +320,7 @@ function sphUnpackI64($value)
  *
  * @return int|string
  */
-function sphFixUint($value)
+function fixUInt($value)
 {
     if (PHP_INT_SIZE >= 8) {
         // x64 route, workaround broken unpack() in 5.2.2+
@@ -329,7 +329,7 @@ function sphFixUint($value)
         }
         return $value;
     } else {
-        // x32 route, workaround php signed/unsigned braindamage
+        // x32 route, workaround php signed/unsigned brain damage
         return sprintf('%u', $value);
     }
 }
@@ -341,7 +341,7 @@ function sphFixUint($value)
  *
  * @return int
  */
-function sphSetBit($flag, $bit, $on)
+function setBit($flag, $bit, $on)
 {
     if ($on) {
         $flag |= 1 << $bit;
@@ -349,5 +349,6 @@ function sphSetBit($flag, $bit, $on)
         $reset = 16777215 ^ (1 << $bit);
         $flag = $flag & $reset;
     }
+
     return $flag;
 }

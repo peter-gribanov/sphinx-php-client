@@ -412,7 +412,7 @@ class Client
     public function __construct()
     {
         // default idf=tfidf_normalized
-        $this->query_flags = sphSetBit(0, 6, true);
+        $this->query_flags = setBit(0, 6, true);
     }
 
     public function __destruct()
@@ -1077,31 +1077,31 @@ class Client
 
         switch ($flag_name) {
             case 'reverse_scan':
-                $this->query_flags = sphSetBit($this->query_flags, 0, $flag_value == 1);
+                $this->query_flags = setBit($this->query_flags, 0, $flag_value == 1);
                 break;
             case 'sort_method':
-                $this->query_flags = sphSetBit($this->query_flags, 1, $flag_value == 'kbuffer');
+                $this->query_flags = setBit($this->query_flags, 1, $flag_value == 'kbuffer');
                 break;
             case 'max_predicted_time':
-                $this->query_flags = sphSetBit($this->query_flags, 2, $flag_value > 0);
+                $this->query_flags = setBit($this->query_flags, 2, $flag_value > 0);
                 $this->predicted_time = (int)$flag_value;
                 break;
             case 'boolean_simplify':
-                $this->query_flags = sphSetBit($this->query_flags, 3, $flag_value);
+                $this->query_flags = setBit($this->query_flags, 3, $flag_value);
                 break;
             case 'idf':
                 if ($flag_value == 'normalized' || $flag_value == 'plain') {
-                    $this->query_flags = sphSetBit($this->query_flags, 4, $flag_value == 'plain');
+                    $this->query_flags = setBit($this->query_flags, 4, $flag_value == 'plain');
                 }
                 if ($flag_value == 'tfidf_normalized' || $flag_value == 'tfidf_unnormalized') {
-                    $this->query_flags = sphSetBit($this->query_flags, 6, $flag_value == 'tfidf_normalized');
+                    $this->query_flags = setBit($this->query_flags, 6, $flag_value == 'tfidf_normalized');
                 }
                 break;
             case 'global_idf':
-                $this->query_flags = sphSetBit($this->query_flags, 5, $flag_value);
+                $this->query_flags = setBit($this->query_flags, 5, $flag_value);
                 break;
             case 'low_priority':
-                $this->query_flags = sphSetBit($this->query_flags, 8, $flag_value);
+                $this->query_flags = setBit($this->query_flags, 8, $flag_value);
                 break;
         }
     }
@@ -1160,7 +1160,7 @@ class Client
 
     public function resetQueryFlag()
     {
-        $this->query_flags = sphSetBit(0, 6, true); // default idf=tfidf_normalized
+        $this->query_flags = setBit(0, 6, true); // default idf=tfidf_normalized
         $this->predicted_time = 0;
     }
 
@@ -1248,7 +1248,7 @@ class Client
         }
         $req .= pack('N', strlen($index)) . $index; // indexes
         $req .= pack('N', 1); // id64 range marker
-        $req .= sphPackU64($this->min_id) . sphPackU64($this->max_id); // id64 range
+        $req .= pack64IntUnsigned($this->min_id) . pack64IntUnsigned($this->max_id); // id64 range
 
         // filters
         $req .= pack('N', count($this->filters));
@@ -1259,11 +1259,11 @@ class Client
                 case self::FILTER_VALUES:
                     $req .= pack('N', count($filter['values']));
                     foreach ($filter['values'] as $value) {
-                        $req .= sphPackI64($value);
+                        $req .= pack64IntSigned($value);
                     }
                     break;
                 case self::FILTER_RANGE:
-                    $req .= sphPackI64($filter['min']) . sphPackI64($filter['max']);
+                    $req .= pack64IntSigned($filter['min']) . pack64IntSigned($filter['max']);
                     break;
                 case self::FILTER_FLOAT_RANGE:
                     $req .= $this->packFloat($filter['min']) . $this->packFloat($filter['max']);
@@ -1322,13 +1322,13 @@ class Client
                 assert(is_numeric($id));
                 assert(is_numeric($val));
 
-                $req .= sphPackU64($id);
+                $req .= pack64IntUnsigned($id);
                 switch ($entry['type']) {
                     case self::ATTR_FLOAT:
                         $req .= $this->packFloat($val);
                         break;
                     case self::ATTR_BIGINT:
-                        $req .= sphPackI64($val);
+                        $req .= pack64IntSigned($val);
                         break;
                     default:
                         $req .= pack('N', $val);
@@ -1385,7 +1385,8 @@ class Client
         $nreqs = count($this->reqs);
         $req = join('', $this->reqs);
         $len = 8 + strlen($req);
-        $req = pack('nnNNN', self::SEARCHD_COMMAND_SEARCH, self::VER_COMMAND_SEARCH, $len, 0, $nreqs) . $req; // add header
+        // add header
+        $req = pack('nnNNN', self::SEARCHD_COMMAND_SEARCH, self::VER_COMMAND_SEARCH, $len, 0, $nreqs) . $req;
 
         if (!$this->send($fp, $req, $len + 8) || !($response = $this->getResponse($fp, self::VER_COMMAND_SEARCH))) {
             $this->mbPop();
@@ -1479,14 +1480,14 @@ class Client
 
                 // parse document id and weight
                 if ($id64) {
-                    $doc = sphUnpackU64(substr($response, $p, 8));
+                    $doc = unpack64IntUnsigned(substr($response, $p, 8));
                     $p += 8;
                     list(,$weight) = unpack('N*', substr($response, $p, 4));
                     $p += 4;
                 } else {
                     list($doc, $weight) = array_values(unpack('N*N*', substr($response, $p, 8)));
                     $p += 8;
-                    $doc = sphFixUint($doc);
+                    $doc = fixUInt($doc);
                 }
                 $weight = sprintf('%u', $weight);
 
@@ -1502,7 +1503,7 @@ class Client
                 foreach ($attrs as $attr => $type) {
                     // handle 64bit ints
                     if ($type == self::ATTR_BIGINT) {
-                        $attrvals[$attr] = sphUnpackI64(substr($response, $p, 8));
+                        $attrvals[$attr] = unpack64IntSigned(substr($response, $p, 8));
                         $p += 8;
                         continue;
                     }
@@ -1525,13 +1526,13 @@ class Client
                         while ($nvalues --> 0 && $p < $max) {
                             list(, $val) = unpack('N*', substr($response, $p, 4));
                             $p += 4;
-                            $attrvals[$attr][] = sphFixUint($val);
+                            $attrvals[$attr][] = fixUInt($val);
                         }
                     } elseif ($type == self::ATTR_MULTI64) {
                         $attrvals[$attr] = array();
                         $nvalues = $val;
                         while ($nvalues > 0 && $p < $max) {
-                            $attrvals[$attr][] = sphUnpackI64(substr($response, $p, 8));
+                            $attrvals[$attr][] = unpack64IntSigned(substr($response, $p, 8));
                             $p += 8;
                             $nvalues -= 2;
                         }
@@ -1542,7 +1543,7 @@ class Client
                         $attrvals[$attr] = substr($response, $p, $val - 4);
                         $p += $val-4;
                     } else {
-                        $attrvals[$attr] = sphFixUint($val);
+                        $attrvals[$attr] = fixUInt($val);
                     }
                 }
 
@@ -1676,7 +1677,8 @@ class Client
         $req .= pack('N', strlen($opts['after_match'])) . $opts['after_match'];
         $req .= pack('N', strlen($opts['chunk_separator'])) . $opts['chunk_separator'];
         $req .= pack('NN', (int)$opts['limit'], (int)$opts['around']);
-        $req .= pack('NNN', (int)$opts['limit_passages'], (int)$opts['limit_words'], (int)$opts['start_passage_id']); // v.1.2
+        // v.1.2
+        $req .= pack('NNN', (int)$opts['limit_passages'], (int)$opts['limit_words'], (int)$opts['start_passage_id']);
         $req .= pack('N', strlen($opts['html_strip_mode'])) . $opts['html_strip_mode'];
         $req .= pack('N', strlen($opts['passage_boundary'])) . $opts['passage_boundary'];
 
@@ -1883,7 +1885,7 @@ class Client
 
         $req .= pack('N', count($values));
         foreach ($values as $id => $entry) {
-            $req .= sphPackU64($id);
+            $req .= pack64IntUnsigned($id);
             foreach ($entry as $v) {
                 $req .= pack('N', $mva ? count($v) : $v);
                 if ($mva) {
@@ -1979,7 +1981,8 @@ class Client
             return false;
         }
 
-        $req = pack('nnNN', self::SEARCHD_COMMAND_STATUS, self::VER_COMMAND_STATUS, 4, $session ? 0 : 1); // len=4, body=1
+        // len=4, body=1
+        $req = pack('nnNN', self::SEARCHD_COMMAND_STATUS, self::VER_COMMAND_STATUS, 4, $session ? 0 : 1);
         if (!$this->send($fp, $req, 12) || !($response = $this->getResponse($fp, self::VER_COMMAND_STATUS))) {
             $this->mbPop();
             return false;
