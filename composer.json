@@ -4,6 +4,9 @@
   "license": "GPL-3.0",
   "type": "library",
   "autoload": {
-    "files": [ "src/SphinxClient.php" ]
+    "files": [
+      "src/const.php",
+      "src/SphinxClient.php"
+    ]
   }
 }
