@@ -1070,23 +1070,23 @@ class SphinxClient
      * Set ranking mode
      *
      * @param int $ranker
-     * @param string $rankexpr
+     * @param string $rank_expr
      */
-    public function setRankingMode($ranker, $rankexpr='')
+    public function setRankingMode($ranker, $rank_expr='')
     {
         assert($ranker === 0 || $ranker >= 1 && $ranker < SPH_RANK_TOTAL);
-        assert(is_string($rankexpr));
+        assert(is_string($rank_expr));
         $this->ranker = $ranker;
-        $this->rank_expr = $rankexpr;
+        $this->rank_expr = $rank_expr;
     }
 
     /**
      * Set matches sorting mode
      *
      * @param int $mode
-     * @param string $sortby
+     * @param string $sort_by
      */
-    public function setSortMode($mode, $sortby = '')
+    public function setSortMode($mode, $sort_by = '')
     {
         assert (
             $mode == SPH_SORT_RELEVANCE ||
@@ -1096,11 +1096,11 @@ class SphinxClient
             $mode == SPH_SORT_EXTENDED ||
             $mode == SPH_SORT_EXPR
         );
-        assert(is_string($sortby));
-        assert($mode == SPH_SORT_RELEVANCE || strlen($sortby) > 0);
+        assert(is_string($sort_by));
+        assert($mode == SPH_SORT_RELEVANCE || strlen($sort_by) > 0);
 
         $this->sort = $mode;
-        $this->sort_by = $sortby;
+        $this->sort_by = $sort_by;
     }
 
     /**
@@ -1255,21 +1255,21 @@ class SphinxClient
      * Required to use @geodist in filters and sorting
      * Latitude and longitude must be in radians
      *
-     * @param string $attrlat
-     * @param string $attrlong
+     * @param string $attr_lat
+     * @param string $attr_long
      * @param float $lat
      * @param float $long
      */
-    public function setGeoAnchor($attrlat, $attrlong, $lat, $long)
+    public function setGeoAnchor($attr_lat, $attr_long, $lat, $long)
     {
-        assert(is_string($attrlat));
-        assert(is_string($attrlong));
+        assert(is_string($attr_lat));
+        assert(is_string($attr_long));
         assert(is_float($lat));
         assert(is_float($long));
 
         $this->anchor = array(
-            'attrlat' => $attrlat,
-            'attrlong' => $attrlong,
+            'attrlat' => $attr_lat,
+            'attrlong' => $attr_long,
             'lat' => $lat,
             'long' => $long
         );
@@ -1280,12 +1280,12 @@ class SphinxClient
      *
      * @param string $attribute
      * @param string $func
-     * @param string $groupsort
+     * @param string $group_sort
      */
-    public function setGroupBy($attribute, $func, $groupsort = '@group desc')
+    public function setGroupBy($attribute, $func, $group_sort = '@group desc')
     {
         assert(is_string($attribute));
-        assert(is_string($groupsort));
+        assert(is_string($group_sort));
         assert(
             $func == SPH_GROUPBY_DAY ||
             $func == SPH_GROUPBY_WEEK ||
@@ -1297,7 +1297,7 @@ class SphinxClient
 
         $this->group_by = $attribute;
         $this->group_func = $func;
-        $this->group_sort = $groupsort;
+        $this->group_sort = $group_sort;
     }
 
     /**
@@ -1329,12 +1329,12 @@ class SphinxClient
      * Set result set format (hash or array; hash by default)
      * PHP specific; needed for group-by-MVA result sets that may contain duplicate IDs
      *
-     * @param bool $arrayresult
+     * @param bool $array_result
      */
-    public function setArrayResult($arrayresult)
+    public function setArrayResult($array_result)
     {
-        assert(is_bool($arrayresult));
-        $this->array_result = $arrayresult;
+        assert(is_bool($array_result));
+        $this->array_result = $array_result;
     }
 
     /**
@@ -1344,18 +1344,18 @@ class SphinxClient
      *
      * @deprecated Do not call this method. Use SphinxQL REMAP() function instead.
      *
-     * @param string $attrname
-     * @param string $attrtype
+     * @param string $attr_name
+     * @param string $attr_type
      * @param array $values
      */
-    public function setOverride($attrname, $attrtype, array $values)
+    public function setOverride($attr_name, $attr_type, array $values)
     {
         trigger_error(
             'DEPRECATED: Do not call this method. Use SphinxQL REMAP() function instead.',
             E_USER_DEPRECATED
         );
-        assert(is_string($attrname));
-        assert(in_array($attrtype, array(
+        assert(is_string($attr_name));
+        assert(in_array($attr_type, array(
             SPH_ATTR_INTEGER,
             SPH_ATTR_TIMESTAMP,
             SPH_ATTR_BOOL,
@@ -1363,9 +1363,9 @@ class SphinxClient
             SPH_ATTR_BIGINT
         )));
 
-        $this->overrides[$attrname] = array(
-            'attr' => $attrname,
-            'type' => $attrtype,
+        $this->overrides[$attr_name] = array(
+            'attr' => $attr_name,
+            'type' => $attr_type,
             'values' => $values
         );
     }
@@ -1446,19 +1446,19 @@ class SphinxClient
     /**
      * Set outer order by parameters
      *
-     * @param string $orderby
+     * @param string $order_by
      * @param int $offset
      * @param int $limit
      */
-    public function setOuterSelect($orderby, $offset, $limit)
+    public function setOuterSelect($order_by, $offset, $limit)
     {
-        assert(is_string($orderby));
+        assert(is_string($order_by));
         assert(is_int($offset));
         assert(is_int($limit));
         assert($offset >= 0);
         assert($limit > 0);
 
-        $this->outer_order_by = $orderby;
+        $this->outer_order_by = $order_by;
         $this->outer_offset = $offset;
         $this->outer_limit = $limit;
         $this->has_outer = true;
@@ -1544,13 +1544,13 @@ class SphinxClient
     /**
      * Helper to pack floats in network byte order
      *
-     * @param float $f
+     * @param float $float
      *
      * @return string
      */
-    protected function packFloat($f)
+    protected function packFloat($float)
     {
-        $t1 = pack('f', $f); // machine order
+        $t1 = pack('f', $float); // machine order
         list(, $t2) = unpack('L*', $t1); // int in machine order
         return pack('N', $t2);
     }
@@ -2175,16 +2175,16 @@ class SphinxClient
      * @param array $attrs
      * @param array $values
      * @param bool $mva
-     * @param bool $ignorenonexistent
+     * @param bool $ignore_non_existent
      *
      * @return int
      */
-    public function updateAttributes($index, array $attrs, array $values, $mva = false, $ignorenonexistent = false)
+    public function updateAttributes($index, array $attrs, array $values, $mva = false, $ignore_non_existent = false)
     {
         // verify everything
         assert(is_string($index));
         assert(is_bool($mva));
-        assert(is_bool($ignorenonexistent));
+        assert(is_bool($ignore_non_existent));
 
         foreach ($attrs as $attr) {
             assert(is_string($attr));
@@ -2211,7 +2211,7 @@ class SphinxClient
         $req = pack('N', strlen($index)) . $index;
 
         $req .= pack('N', count($attrs));
-        $req .= pack('N', $ignorenonexistent ? 1 : 0);
+        $req .= pack('N', $ignore_non_existent ? 1 : 0);
         foreach ($attrs as $attr) {
             $req .= pack('N', strlen($attr)) . $attr;
             $req .= pack('N', $mva ? 1 : 0);
