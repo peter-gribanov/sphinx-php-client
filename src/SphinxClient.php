@@ -137,42 +137,42 @@ define('SPH_GROUPBY_ATTRPAIR', 5);
 //  - return ints if we can
 //  - otherwise format number into a string
 
-function sphPackI64($v)
+function sphPackI64($value)
 {
-    assert(is_numeric($v));
+    assert(is_numeric($value));
 
     // x64
     if (PHP_INT_SIZE >= 8) {
-        $v = (int)$v;
-        return pack('NN', $v >> 32, $v & 0xFFFFFFFF);
+        $value = (int)$value;
+        return pack('NN', $value >> 32, $value & 0xFFFFFFFF);
     }
 
     // x32, int
-    if (is_int($v)) {
-        return pack('NN', $v < 0 ? -1 : 0, $v);
+    if (is_int($value)) {
+        return pack('NN', $value < 0 ? -1 : 0, $value);
     }
 
     // x32, bcmath
     if (function_exists('bcmul')) {
-        if (bccomp($v, 0) == -1) {
-            $v = bcadd('18446744073709551616', $v);
+        if (bccomp($value, 0) == -1) {
+            $value = bcadd('18446744073709551616', $value);
         }
-        $h = bcdiv($v, '4294967296', 0);
-        $l = bcmod($v, '4294967296');
+        $h = bcdiv($value, '4294967296', 0);
+        $l = bcmod($value, '4294967296');
         return pack('NN', (float)$h, (float)$l); // conversion to float is intentional; int would lose 31st bit
     }
 
     // x32, no-bcmath
-    $p = max(0, strlen($v) - 13);
-    $lo = abs((float)substr($v, $p));
-    $hi = abs((float)substr($v, 0, $p));
+    $p = max(0, strlen($value) - 13);
+    $lo = abs((float)substr($value, $p));
+    $hi = abs((float)substr($value, 0, $p));
 
     $m = $lo + $hi * 1316134912.0; // (10 ^ 13) % (1 << 32) = 1316134912
     $q = floor($m / 4294967296.0);
     $l = $m - ($q * 4294967296.0);
     $h = $hi * 2328.0 + $q; // (10 ^ 13) / (1 << 32) = 2328
 
-    if ($v < 0) {
+    if ($value < 0) {
         if ($l == 0) {
             $h = 4294967296.0 - $h;
         } else {
@@ -184,30 +184,30 @@ function sphPackI64($v)
 }
 
 /// pack 64-bit unsigned
-function sphPackU64($v)
+function sphPackU64($value)
 {
-    assert(is_numeric($v));
+    assert(is_numeric($value));
 
     // x64
     if (PHP_INT_SIZE >= 8) {
-        assert($v >= 0);
+        assert($value >= 0);
 
         // x64, int
-        if (is_int($v)) {
-            return pack('NN', $v >> 32, $v & 0xFFFFFFFF);
+        if (is_int($value)) {
+            return pack('NN', $value >> 32, $value & 0xFFFFFFFF);
         }
 
         // x64, bcmath
         if (function_exists('bcmul')) {
-            $h = bcdiv($v, 4294967296, 0);
-            $l = bcmod($v, 4294967296);
+            $h = bcdiv($value, 4294967296, 0);
+            $l = bcmod($value, 4294967296);
             return pack('NN', $h, $l);
         }
 
         // x64, no-bcmath
-        $p = max(0, strlen($v) - 13);
-        $lo = (int)substr($v, $p);
-        $hi = (int)substr($v, 0, $p);
+        $p = max(0, strlen($value) - 13);
+        $lo = (int)substr($value, $p);
+        $hi = (int)substr($value, 0, $p);
 
         $m = $lo + $hi * 1316134912;
         $l = $m % 4294967296;
@@ -217,21 +217,21 @@ function sphPackU64($v)
     }
 
     // x32, int
-    if (is_int($v)) {
-        return pack('NN', 0, $v);
+    if (is_int($value)) {
+        return pack('NN', 0, $value);
     }
 
     // x32, bcmath
     if (function_exists('bcmul')) {
-        $h = bcdiv($v, '4294967296', 0);
-        $l = bcmod($v, '4294967296');
+        $h = bcdiv($value, '4294967296', 0);
+        $l = bcmod($value, '4294967296');
         return pack('NN', (float)$h, (float)$l); // conversion to float is intentional; int would lose 31st bit
     }
 
     // x32, no-bcmath
-    $p = max(0, strlen($v) - 13);
-    $lo = (float)substr($v, $p);
-    $hi = (float)substr($v, 0, $p);
+    $p = max(0, strlen($value) - 13);
+    $lo = (float)substr($value, $p);
+    $hi = (float)substr($value, 0, $p);
 
     $m = $lo + $hi * 1316134912.0;
     $q = floor($m / 4294967296.0);
@@ -242,9 +242,9 @@ function sphPackU64($v)
 }
 
 // unpack 64-bit unsigned
-function sphUnpackU64($v)
+function sphUnpackU64($value)
 {
-    list($hi, $lo) = array_values(unpack('N*N*', $v));
+    list($hi, $lo) = array_values(unpack('N*N*', $value));
 
     if (PHP_INT_SIZE >= 8) {
         if ($hi < 0) { // because php 5.2.2 to 5.2.5 is totally fucked up again
@@ -315,9 +315,9 @@ function sphUnpackU64($v)
 }
 
 // unpack 64-bit signed
-function sphUnpackI64($v)
+function sphUnpackI64($value)
 {
-    list($hi, $lo) = array_values(unpack('N*N*', $v));
+    list($hi, $lo) = array_values(unpack('N*N*', $value));
 
     // x64
     if (PHP_INT_SIZE >= 8) {
