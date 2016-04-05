@@ -4,6 +4,7 @@
   "license": "GPL-3.0",
   "type": "library",
   "homepage": "http://sphinxsearch.com/",
+  "keywords": [ "php", "sphinx" ],
   "autoload": {
     "files": [
       "src/const.php",
@@ -17,5 +18,8 @@
     "psr-0": {
       "Sphinx\\Test": "tests/unit/"
     }
+  },
+  "require": {
+    "php": ">=5.3.0"
   }
 }
