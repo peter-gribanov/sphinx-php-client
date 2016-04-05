@@ -311,7 +311,7 @@ class Client
     /**
      * Connect timeout
      *
-     * @var int
+     * @var int|float
      */
     protected $timeout = 0;
 
