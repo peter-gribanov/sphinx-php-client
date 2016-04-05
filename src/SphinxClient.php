@@ -997,30 +997,34 @@ class SphinxClient
             ($flag_name == 'max_predicted_time' && is_int($flag_value) && $flag_value >= 0)
         );
 
-        if ($flag_name == 'reverse_scan') {
-            $this->query_flags = sphSetBit($this->query_flags, 0, $flag_value == 1);
-        }
-        if ($flag_name == 'sort_method') {
-            $this->query_flags = sphSetBit($this->query_flags, 1, $flag_value == 'kbuffer');
-        }
-        if ($flag_name == 'max_predicted_time') {
-            $this->query_flags = sphSetBit($this->query_flags, 2, $flag_value > 0);
-            $this->predicted_time = (int)$flag_value;
-        }
-        if ($flag_name == 'boolean_simplify') {
-            $this->query_flags = sphSetBit($this->query_flags, 3, $flag_value);
-        }
-        if ($flag_name == 'idf' && ($flag_value == 'normalized' || $flag_value == 'plain')) {
-            $this->query_flags = sphSetBit($this->query_flags, 4, $flag_value == 'plain');
-        }
-        if ($flag_name == 'global_idf') {
-            $this->query_flags = sphSetBit($this->query_flags, 5, $flag_value);
-        }
-        if ($flag_name == 'idf' && ($flag_value == 'tfidf_normalized' || $flag_value == 'tfidf_unnormalized')) {
-            $this->query_flags = sphSetBit($this->query_flags, 6, $flag_value == 'tfidf_normalized');
-        }
-        if ($flag_name == 'low_priority') {
-            $this->query_flags = sphSetBit($this->query_flags, 8, $flag_value);
+        switch ($flag_name) {
+            case 'reverse_scan':
+                $this->query_flags = sphSetBit($this->query_flags, 0, $flag_value == 1);
+                break;
+            case 'sort_method':
+                $this->query_flags = sphSetBit($this->query_flags, 1, $flag_value == 'kbuffer');
+                break;
+            case 'max_predicted_time':
+                $this->query_flags = sphSetBit($this->query_flags, 2, $flag_value > 0);
+                $this->predicted_time = (int)$flag_value;
+                break;
+            case 'boolean_simplify':
+                $this->query_flags = sphSetBit($this->query_flags, 3, $flag_value);
+                break;
+            case 'idf':
+                if ($flag_value == 'normalized' || $flag_value == 'plain') {
+                    $this->query_flags = sphSetBit($this->query_flags, 4, $flag_value == 'plain');
+                }
+                if ($flag_value == 'tfidf_normalized' || $flag_value == 'tfidf_unnormalized') {
+                    $this->query_flags = sphSetBit($this->query_flags, 6, $flag_value == 'tfidf_normalized');
+                }
+                break;
+            case 'global_idf':
+                $this->query_flags = sphSetBit($this->query_flags, 5, $flag_value);
+                break;
+            case 'low_priority':
+                $this->query_flags = sphSetBit($this->query_flags, 8, $flag_value);
+                break;
         }
     }
 
