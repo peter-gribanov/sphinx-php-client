@@ -476,7 +476,7 @@ class Client
     /**
      * Set server connection timeout (0 to remove)
      *
-     * @param int $timeout
+     * @param int|float $timeout
      */
     public function setConnectTimeout($timeout)
     {
