@@ -6,6 +6,7 @@
   "autoload": {
     "files": [
       "src/const.php",
+      "src/functions.php",
       "src/SphinxClient.php"
     ]
   }
