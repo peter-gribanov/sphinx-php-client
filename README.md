@@ -30,7 +30,7 @@ Search **test** word in Sphinx for **example_idx** index.
 ```php
 $sphinx = new SphinxClient();
 $sphinx->setServer('localhost', 6712);
-$sphinx->setMatchMode(SPH_MATCH_ANY);
+$sphinx->setMatchMode(SphinxClient::MATCH_ANY);
 $sphinx->setMaxQueryTime(3);
 
 $result = $sphinx->query('test', 'example_idx');

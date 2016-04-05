@@ -67,7 +67,7 @@ class SphinxClient
      *
      * @var int
      */
-    protected $mode = SPH_MATCH_EXTENDED2;
+    protected $mode = self::MATCH_EXTENDED2;
 
     /**
      * Per-field weights (default is 1 for all fields)
@@ -81,7 +81,7 @@ class SphinxClient
      *
      * @var int
      */
-    protected $sort = SPH_SORT_RELEVANCE;
+    protected $sort = self::SORT_RELEVANCE;
 
     /**
      * Attribute to sort by
@@ -123,7 +123,7 @@ class SphinxClient
      *
      * @var int
      */
-    protected $group_func = SPH_GROUPBY_DAY;
+    protected $group_func = self::GROUP_BY_DAY;
 
     /**
      * Group-by sorting clause (to sort groups in result set with)
@@ -186,10 +186,10 @@ class SphinxClient
      *
      * @var int
      */
-    protected $ranker = SPH_RANK_PROXIMITY_BM25;
+    protected $ranker = self::RANK_PROXIMITY_BM25;
 
     /**
-     * Ranking mode expression (for SPH_RANK_EXPR)
+     * Ranking mode expression (for self::RANK_EXPR)
      *
      * @var string
      */
@@ -321,6 +321,86 @@ class SphinxClient
      * @var resource|bool
      */
     protected $socket = false;
+
+    // known searchd commands
+    const SEARCHD_COMMAND_SEARCH      = 0;
+    const SEARCHD_COMMAND_EXCERPT     = 1;
+    const SEARCHD_COMMAND_UPDATE      = 2;
+    const SEARCHD_COMMAND_KEYWORDS    = 3;
+    const SEARCHD_COMMAND_PERSIST     = 4;
+    const SEARCHD_COMMAND_STATUS      = 5;
+    const SEARCHD_COMMAND_FLUSH_ATTRS = 7;
+
+    // current client-side command implementation versions
+    const VER_COMMAND_SEARCH      = 0x11E;
+    const VER_COMMAND_EXCERPT     = 0x104;
+    const VER_COMMAND_UPDATE      = 0x103;
+    const VER_COMMAND_KEYWORDS    = 0x100;
+    const VER_COMMAND_STATUS      = 0x101;
+    const VER_COMMAND_QUERY       = 0x100;
+    const VER_COMMAND_FLUSH_ATTRS = 0x100;
+
+    // known searchd status codes
+    const SEARCHD_OK      = 0;
+    const SEARCHD_ERROR   = 1;
+    const SEARCHD_RETRY   = 2;
+    const SEARCHD_WARNING = 3;
+
+    // known match modes
+    const MATCH_ALL        = 0;
+    const MATCH_ANY        = 1;
+    const MATCH_PHRASE     = 2;
+    const MATCH_BOOLEAN    = 3;
+    const MATCH_EXTENDED   = 4;
+    const MATCH_FULL_SCAN  = 5;
+    const MATCH_EXTENDED2  = 6; // extended engine V2 (TEMPORARY, WILL BE REMOVED)
+
+    // known ranking modes (ext2 only)
+    const RANK_PROXIMITY_BM25  = 0; // default mode, phrase proximity major factor and BM25 minor one
+    const RANK_BM25            = 1; // statistical mode, BM25 ranking only (faster but worse quality)
+    const RANK_NONE            = 2; // no ranking, all matches get a weight of 1
+    const RANK_WORD_COUNT      = 3; // simple word-count weighting, rank is a weighted sum of per-field keyword
+                                    // occurrence counts
+    const RANK_PROXIMITY       = 4;
+    const RANK_MATCH_ANY       = 5;
+    const RANK_FIELD_MASK      = 6;
+    const RANK_SPH04           = 7;
+    const RANK_EXPR            = 8;
+    const RANK_TOTAL           = 9;
+
+    // known sort modes
+    const SORT_RELEVANCE     = 0;
+    const SORT_ATTR_DESC     = 1;
+    const SORT_ATTR_ASC      = 2;
+    const SORT_TIME_SEGMENTS = 3;
+    const SORT_EXTENDED      = 4;
+    const SORT_EXPR          = 5;
+
+    // known filter types
+    const FILTER_VALUES      = 0;
+    const FILTER_RANGE       = 1;
+    const FILTER_FLOAT_RANGE = 2;
+    const FILTER_STRING      = 3;
+
+    // known attribute types
+    const ATTR_INTEGER   = 1;
+    const ATTR_TIMESTAMP = 2;
+    const ATTR_ORDINAL   = 3;
+    const ATTR_BOOL      = 4;
+    const ATTR_FLOAT     = 5;
+    const ATTR_BIGINT    = 6;
+    const ATTR_STRING    = 7;
+    const ATTR_FACTORS   = 1001;
+    const ATTR_MULTI     = 0x40000001;
+    const ATTR_MULTI64   = 0x40000002;
+
+    // known grouping functions
+    const GROUP_BY_DAY       = 0;
+    const GROUP_BY_WEEK      = 1;
+    const GROUP_BY_MONTH     = 2;
+    const GROUP_BY_YEAR      = 3;
+    const GROUP_BY_ATTR      = 4;
+    const GROUP_BY_ATTR_PAIR = 5;
 
     /////////////////////////////////////////////////////////////////////////////
     // common stuff
@@ -553,20 +633,20 @@ class SphinxClient
         }
 
         // check status
-        if ($status == SEARCHD_WARNING) {
+        if ($status == self::SEARCHD_WARNING) {
             list(, $wlen) = unpack('N*', substr($response, 0, 4));
             $this->warning = substr($response, 4, $wlen);
             return substr($response, 4 + $wlen);
         }
-        if ($status == SEARCHD_ERROR) {
+        if ($status == self::SEARCHD_ERROR) {
             $this->error = 'searchd error: ' . substr($response, 4);
             return false;
         }
-        if ($status == SEARCHD_RETRY) {
+        if ($status == self::SEARCHD_RETRY) {
             $this->error = 'temporary searchd error: ' . substr($response, 4);
             return false;
         }
-        if ($status != SEARCHD_OK) {
+        if ($status != self::SEARCHD_OK) {
             $this->error = "unknown status code '$status'";
             return false;
         }
@@ -638,13 +718,13 @@ class SphinxClient
             E_USER_DEPRECATED
         );
         assert(in_array($mode, array(
-            SPH_MATCH_ALL,
-            SPH_MATCH_ANY,
-            SPH_MATCH_PHRASE,
-            SPH_MATCH_BOOLEAN,
-            SPH_MATCH_EXTENDED,
-            SPH_MATCH_FULLSCAN,
-            SPH_MATCH_EXTENDED2
+            self::MATCH_ALL,
+            self::MATCH_ANY,
+            self::MATCH_PHRASE,
+            self::MATCH_BOOLEAN,
+            self::MATCH_EXTENDED,
+            self::MATCH_FULL_SCAN,
+            self::MATCH_EXTENDED2
         )));
         $this->mode = $mode;
     }
@@ -657,7 +737,7 @@ class SphinxClient
      */
     public function setRankingMode($ranker, $rank_expr='')
     {
-        assert($ranker === 0 || $ranker >= 1 && $ranker < SPH_RANK_TOTAL);
+        assert($ranker === 0 || $ranker >= 1 && $ranker < self::RANK_TOTAL);
         assert(is_string($rank_expr));
         $this->ranker = $ranker;
         $this->rank_expr = $rank_expr;
@@ -672,15 +752,15 @@ class SphinxClient
     public function setSortMode($mode, $sort_by = '')
     {
         assert(in_array($mode, array(
-            SPH_SORT_RELEVANCE,
-            SPH_SORT_ATTR_DESC,
-            SPH_SORT_ATTR_ASC,
-            SPH_SORT_TIME_SEGMENTS,
-            SPH_SORT_EXTENDED,
-            SPH_SORT_EXPR
+            self::SORT_RELEVANCE,
+            self::SORT_ATTR_DESC,
+            self::SORT_ATTR_ASC,
+            self::SORT_TIME_SEGMENTS,
+            self::SORT_EXTENDED,
+            self::SORT_EXPR
         )));
         assert(is_string($sort_by));
-        assert($mode == SPH_SORT_RELEVANCE || strlen($sort_by) > 0);
+        assert($mode == self::SORT_RELEVANCE || strlen($sort_by) > 0);
 
         $this->sort = $mode;
         $this->sort_by = $sort_by;
@@ -757,7 +837,7 @@ class SphinxClient
         }
 
         $this->filters[] = array(
-            'type' => SPH_FILTER_VALUES,
+            'type' => self::FILTER_VALUES,
             'attr' => $attribute,
             'exclude' => $exclude,
             'values' => $values
@@ -777,7 +857,7 @@ class SphinxClient
         assert(is_string($attribute));
         assert(is_string($value));
         $this->filters[] = array(
-            'type' => SPH_FILTER_STRING,
+            'type' => self::FILTER_STRING,
             'attr' => $attribute,
             'exclude' => $exclude,
             'value' => $value
@@ -801,7 +881,7 @@ class SphinxClient
         assert($min <= $max);
 
         $this->filters[] = array(
-            'type' => SPH_FILTER_RANGE,
+            'type' => self::FILTER_RANGE,
             'attr' => $attribute,
             'exclude' => $exclude,
             'min' => $min,
@@ -826,7 +906,7 @@ class SphinxClient
         assert($min <= $max);
 
         $this->filters[] = array(
-            'type' => SPH_FILTER_FLOATRANGE,
+            'type' => self::FILTER_FLOAT_RANGE,
             'attr' => $attribute,
             'exclude' => $exclude,
             'min' => $min,
@@ -871,12 +951,12 @@ class SphinxClient
         assert(is_string($attribute));
         assert(is_string($group_sort));
         assert(in_array($func, array(
-            SPH_GROUPBY_DAY,
-            SPH_GROUPBY_WEEK,
-            SPH_GROUPBY_MONTH,
-            SPH_GROUPBY_YEAR,
-            SPH_GROUPBY_ATTR,
-            SPH_GROUPBY_ATTRPAIR
+            self::GROUP_BY_DAY,
+            self::GROUP_BY_WEEK,
+            self::GROUP_BY_MONTH,
+            self::GROUP_BY_YEAR,
+            self::GROUP_BY_ATTR,
+            self::GROUP_BY_ATTR_PAIR
         )));
 
         $this->group_by = $attribute;
@@ -940,11 +1020,11 @@ class SphinxClient
         );
         assert(is_string($attr_name));
         assert(in_array($attr_type, array(
-            SPH_ATTR_INTEGER,
-            SPH_ATTR_TIMESTAMP,
-            SPH_ATTR_BOOL,
-            SPH_ATTR_FLOAT,
-            SPH_ATTR_BIGINT
+            self::ATTR_INTEGER,
+            self::ATTR_TIMESTAMP,
+            self::ATTR_BOOL,
+            self::ATTR_FLOAT,
+            self::ATTR_BIGINT
         )));
 
         $this->overrides[$attr_name] = array(
@@ -1066,7 +1146,7 @@ class SphinxClient
     public function resetGroupBy()
     {
         $this->group_by = '';
-        $this->group_func = SPH_GROUPBY_DAY;
+        $this->group_func = self::GROUP_BY_DAY;
         $this->group_sort = '@group desc';
         $this->group_distinct = '';
     }
@@ -1119,7 +1199,7 @@ class SphinxClient
         $this->error = $results[0]['error'];
         $this->warning = $results[0]['warning'];
 
-        if ($results[0]['status'] == SEARCHD_ERROR) {
+        if ($results[0]['status'] == self::SEARCHD_ERROR) {
             return false;
         } else {
             return $results[0];
@@ -1157,7 +1237,7 @@ class SphinxClient
 
         // build request
         $req = pack('NNNNN', $this->query_flags, $this->offset, $this->limit, $this->mode, $this->ranker);
-        if ($this->ranker == SPH_RANK_EXPR) {
+        if ($this->ranker == self::RANK_EXPR) {
             $req .= pack('N', strlen($this->rank_expr)) . $this->rank_expr;
         }
         $req .= pack('N', $this->sort); // (deprecated) sort mode
@@ -1177,19 +1257,19 @@ class SphinxClient
             $req .= pack('N', strlen($filter['attr'])) . $filter['attr'];
             $req .= pack('N', $filter['type']);
             switch ($filter['type']) {
-                case SPH_FILTER_VALUES:
+                case self::FILTER_VALUES:
                     $req .= pack('N', count($filter['values']));
                     foreach ($filter['values'] as $value) {
                         $req .= sphPackI64($value);
                     }
                     break;
-                case SPH_FILTER_RANGE:
+                case self::FILTER_RANGE:
                     $req .= sphPackI64($filter['min']) . sphPackI64($filter['max']);
                     break;
-                case SPH_FILTER_FLOATRANGE:
+                case self::FILTER_FLOAT_RANGE:
                     $req .= $this->packFloat($filter['min']) . $this->packFloat($filter['max']);
                     break;
-                case SPH_FILTER_STRING:
+                case self::FILTER_STRING:
                     $req .= pack('N', strlen($filter['value'])) . $filter['value'];
                     break;
                 default:
@@ -1245,10 +1325,10 @@ class SphinxClient
 
                 $req .= sphPackU64($id);
                 switch ($entry['type']) {
-                    case SPH_ATTR_FLOAT:
+                    case self::ATTR_FLOAT:
                         $req .= $this->packFloat($val);
                         break;
-                    case SPH_ATTR_BIGINT:
+                    case self::ATTR_BIGINT:
                         $req .= sphPackI64($val);
                         break;
                     default:
@@ -1306,9 +1386,9 @@ class SphinxClient
         $nreqs = count($this->reqs);
         $req = join('', $this->reqs);
         $len = 8 + strlen($req);
-        $req = pack('nnNNN', SEARCHD_COMMAND_SEARCH, VER_COMMAND_SEARCH, $len, 0, $nreqs) . $req; // add header
+        $req = pack('nnNNN', self::SEARCHD_COMMAND_SEARCH, self::VER_COMMAND_SEARCH, $len, 0, $nreqs) . $req; // add header
 
-        if (!$this->send($fp, $req, $len + 8) || !($response = $this->getResponse($fp, VER_COMMAND_SEARCH))) {
+        if (!$this->send($fp, $req, $len + 8) || !($response = $this->getResponse($fp, self::VER_COMMAND_SEARCH))) {
             $this->mbPop();
             return false;
         }
@@ -1345,13 +1425,13 @@ class SphinxClient
             list(, $status) = unpack('N*', substr($response, $p, 4));
             $p += 4;
             $result['status'] = $status;
-            if ($status != SEARCHD_OK) {
+            if ($status != self::SEARCHD_OK) {
                 list(, $len) = unpack('N*', substr($response, $p, 4));
                 $p += 4;
                 $message = substr($response, $p, $len);
                 $p += $len;
 
-                if ($status == SEARCHD_WARNING) {
+                if ($status == self::SEARCHD_WARNING) {
                     $result['warning'] = $message;
                 } else {
                     $result['error'] = $message;
@@ -1422,14 +1502,14 @@ class SphinxClient
                 $attrvals = array();
                 foreach ($attrs as $attr => $type) {
                     // handle 64bit ints
-                    if ($type == SPH_ATTR_BIGINT) {
+                    if ($type == self::ATTR_BIGINT) {
                         $attrvals[$attr] = sphUnpackI64(substr($response, $p, 8));
                         $p += 8;
                         continue;
                     }
 
                     // handle floats
-                    if ($type == SPH_ATTR_FLOAT) {
+                    if ($type == self::ATTR_FLOAT) {
                         list(, $uval) = unpack('N*', substr($response, $p, 4));
                         $p += 4;
                         list(, $fval) = unpack('f*', pack('L', $uval));
@@ -1440,7 +1520,7 @@ class SphinxClient
                     // handle everything else as unsigned ints
                     list(, $val) = unpack('N*', substr($response, $p, 4));
                     $p += 4;
-                    if ($type == SPH_ATTR_MULTI) {
+                    if ($type == self::ATTR_MULTI) {
                         $attrvals[$attr] = array();
                         $nvalues = $val;
                         while ($nvalues --> 0 && $p < $max) {
@@ -1448,7 +1528,7 @@ class SphinxClient
                             $p += 4;
                             $attrvals[$attr][] = sphFixUint($val);
                         }
-                    } elseif ($type == SPH_ATTR_MULTI64) {
+                    } elseif ($type == self::ATTR_MULTI64) {
                         $attrvals[$attr] = array();
                         $nvalues = $val;
                         while ($nvalues > 0 && $p < $max) {
@@ -1456,10 +1536,10 @@ class SphinxClient
                             $p += 8;
                             $nvalues -= 2;
                         }
-                    } elseif ($type == SPH_ATTR_STRING) {
+                    } elseif ($type == self::ATTR_STRING) {
                         $attrvals[$attr] = substr($response, $p, $val);
                         $p += $val;
-                    } elseif ($type == SPH_ATTR_FACTORS) {
+                    } elseif ($type == self::ATTR_FACTORS) {
                         $attrvals[$attr] = substr($response, $p, $val - 4);
                         $p += $val-4;
                     } else {
@@ -1613,8 +1693,8 @@ class SphinxClient
         ////////////////////////////
 
         $len = strlen($req);
-        $req = pack('nnN', SEARCHD_COMMAND_EXCERPT, VER_COMMAND_EXCERPT, $len) . $req; // add header
-        if (!$this->send($fp, $req, $len + 8) || !($response = $this->getResponse($fp, VER_COMMAND_EXCERPT))) {
+        $req = pack('nnN', self::SEARCHD_COMMAND_EXCERPT, self::VER_COMMAND_EXCERPT, $len) . $req; // add header
+        if (!$this->send($fp, $req, $len + 8) || !($response = $this->getResponse($fp, self::VER_COMMAND_EXCERPT))) {
             $this->mbPop();
             return false;
         }
@@ -1686,8 +1766,8 @@ class SphinxClient
         ////////////////////////////
 
         $len = strlen($req);
-        $req = pack('nnN', SEARCHD_COMMAND_KEYWORDS, VER_COMMAND_KEYWORDS, $len) . $req; // add header
-        if (!$this->send($fp, $req, $len + 8) || !($response = $this->getResponse($fp, VER_COMMAND_KEYWORDS))) {
+        $req = pack('nnN', self::SEARCHD_COMMAND_KEYWORDS, self::VER_COMMAND_KEYWORDS, $len) . $req; // add header
+        if (!$this->send($fp, $req, $len + 8) || !($response = $this->getResponse($fp, self::VER_COMMAND_KEYWORDS))) {
             $this->mbPop();
             return false;
         }
@@ -1822,13 +1902,13 @@ class SphinxClient
         }
 
         $len = strlen($req);
-        $req = pack('nnN', SEARCHD_COMMAND_UPDATE, VER_COMMAND_UPDATE, $len) . $req; // add header
+        $req = pack('nnN', self::SEARCHD_COMMAND_UPDATE, self::VER_COMMAND_UPDATE, $len) . $req; // add header
         if (!$this->send($fp, $req, $len + 8)) {
             $this->mbPop();
             return -1;
         }
 
-        if (!($response = $this->getResponse($fp, VER_COMMAND_UPDATE))) {
+        if (!($response = $this->getResponse($fp, self::VER_COMMAND_UPDATE))) {
             $this->mbPop();
             return -1;
         }
@@ -1856,7 +1936,7 @@ class SphinxClient
             return false;
 
         // command, command version = 0, body length = 4, body = 1
-        $req = pack('nnNN', SEARCHD_COMMAND_PERSIST, 0, 4, 1);
+        $req = pack('nnNN', self::SEARCHD_COMMAND_PERSIST, 0, 4, 1);
         if (!$this->send($fp, $req, 12)) {
             return false;
         }
@@ -1900,8 +1980,8 @@ class SphinxClient
             return false;
         }
 
-        $req = pack('nnNN', SEARCHD_COMMAND_STATUS, VER_COMMAND_STATUS, 4, $session ? 0 : 1); // len=4, body=1
-        if (!$this->send($fp, $req, 12) || !($response = $this->getResponse($fp, VER_COMMAND_STATUS))) {
+        $req = pack('nnNN', self::SEARCHD_COMMAND_STATUS, self::VER_COMMAND_STATUS, 4, $session ? 0 : 1); // len=4, body=1
+        if (!$this->send($fp, $req, 12) || !($response = $this->getResponse($fp, self::VER_COMMAND_STATUS))) {
             $this->mbPop();
             return false;
         }
@@ -1940,8 +2020,8 @@ class SphinxClient
             return -1;
         }
 
-        $req = pack('nnN', SEARCHD_COMMAND_FLUSHATTRS, VER_COMMAND_FLUSHATTRS, 0); // len=0
-        if (!$this->send($fp, $req, 8) || !($response = $this->getResponse($fp, VER_COMMAND_FLUSHATTRS))) {
+        $req = pack('nnN', self::SEARCHD_COMMAND_FLUSH_ATTRS, self::VER_COMMAND_FLUSH_ATTRS, 0); // len=0
+        if (!$this->send($fp, $req, 8) || !($response = $this->getResponse($fp, self::VER_COMMAND_FLUSH_ATTRS))) {
             $this->mbPop();
             return -1;
         }
