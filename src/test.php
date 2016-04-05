@@ -72,13 +72,13 @@ EOF;
     $host = 'localhost';
     $port = 9312;
     $index = '*';
-    $groupby = '';
-    $groupsort = '@group desc';
+    $group_by = '';
+    $group_sort = '@group desc';
     $filter = 'group_id';
-    $filtervals = array();
+    $filter_values = array();
     $distinct = '';
-    $sortby = '';
-    $sortexpr = '';
+    $sort_by = '';
+    $sort_expr = '';
     $limit = 20;
     $ranker = SphinxClient::RANK_PROXIMITY_BM25;
     $select = '';
@@ -100,13 +100,13 @@ EOF;
                 break;
             case '-s':
             case '--sortby':
-                $sortby = $args[++$i];
-                $sortexpr = '';
+                $sort_by = $args[++$i];
+                $sort_expr = '';
                 break;
             case '-S':
             case '--sortexpr':
-                $sortexpr = $args[++$i];
-                $sortby = '';
+                $sort_expr = $args[++$i];
+                $sort_by = '';
                 break;
             case '-a':
             case '--any':
@@ -133,15 +133,15 @@ EOF;
                 break;
             case '-v':
             case '--value':
-                $filtervals[] = $args[++$i];
+                $filter_values[] = $args[++$i];
                 break;
             case '-g':
             case '--groupby':
-                $groupby = $args[++$i];
+                $group_by = $args[++$i];
                 break;
             case '-gs':
             case '--groupsort':
-                $groupsort = $args[++$i];
+                $group_sort = $args[++$i];
                 break;
             case '-d':
             case '--distinct':
@@ -190,17 +190,17 @@ EOF;
     $cl->setConnectTimeout(1);
     $cl->setArrayResult(true);
     $cl->setMatchMode($mode);
-    if (count($filtervals)) {
-        $cl->setFilter($filter, $filtervals);
+    if (count($filter_values)) {
+        $cl->setFilter($filter, $filter_values);
     }
-    if ($groupby) {
-        $cl->setGroupBy($groupby, SphinxClient::GROUP_BY_ATTR, $groupsort);
+    if ($group_by) {
+        $cl->setGroupBy($group_by, SphinxClient::GROUP_BY_ATTR, $group_sort);
     }
-    if ($sortby) {
-        $cl->setSortMode(SphinxClient::SORT_EXTENDED, $sortby);
+    if ($sort_by) {
+        $cl->setSortMode(SphinxClient::SORT_EXTENDED, $sort_by);
     }
-    if ($sortexpr) {
-        $cl->setSortMode(SphinxClient::SORT_EXPR, $sortexpr);
+    if ($sort_expr) {
+        $cl->setSortMode(SphinxClient::SORT_EXPR, $sort_expr);
     }
     if ($distinct) {
         $cl->setGroupDistinct($distinct);
@@ -238,16 +238,16 @@ EOF;
         if (is_array($res['matches'])) {
             $n = 1;
             print 'Matches:' . PHP_EOL;
-            foreach ($res['matches'] as $docinfo) {
-                print "$n. doc_id={$docinfo['id']}, weight={$docinfo['weight']}";
-                foreach ($res['attrs'] as $attrname => $attrtype) {
-                    $value = $docinfo['attrs'][$attrname];
-                    if ($attrtype == SphinxClient::ATTR_MULTI || $attrtype == SphinxClient::ATTR_MULTI64) {
+            foreach ($res['matches'] as $doc_info) {
+                print "$n. doc_id={$doc_info['id']}, weight={$doc_info['weight']}";
+                foreach ($res['attrs'] as $attr_name => $attr_type) {
+                    $value = $doc_info['attrs'][$attr_name];
+                    if ($attr_type == SphinxClient::ATTR_MULTI || $attr_type == SphinxClient::ATTR_MULTI64) {
                         $value = '(' . join(',', $value) . ')';
-                    } elseif ($attrtype == SphinxClient::ATTR_TIMESTAMP) {
+                    } elseif ($attr_type == SphinxClient::ATTR_TIMESTAMP) {
                         $value = date('Y-m-d H:i:s', $value);
                     }
-                    print ", $attrname=$value";
+                    print ", $attr_name=$value";
                 }
                 print PHP_EOL;
                 $n++;
