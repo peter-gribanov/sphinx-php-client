@@ -1453,9 +1453,9 @@ class Client
             }
             $result['fields'] = $fields;
 
-            list(, $nattrs) = unpack('N*', substr($response, $p, 4));
+            list(, $n_attrs) = unpack('N*', substr($response, $p, 4));
             $p += 4;
-            while ($nattrs --> 0 && $p < $max) {
+            while ($n_attrs --> 0 && $p < $max) {
                 list(, $len) = unpack('N*', substr($response, $p, 4));
                 $p += 4;
                 $attr = substr($response, $p, $len);
@@ -1499,58 +1499,58 @@ class Client
                 }
 
                 // parse and create attributes
-                $attrvals = array();
+                $attr_values = array();
                 foreach ($attrs as $attr => $type) {
-                    // handle 64bit ints
+                    // handle 64bit int
                     if ($type == self::ATTR_BIGINT) {
-                        $attrvals[$attr] = unpack64IntSigned(substr($response, $p, 8));
+                        $attr_values[$attr] = unpack64IntSigned(substr($response, $p, 8));
                         $p += 8;
                         continue;
                     }
 
                     // handle floats
                     if ($type == self::ATTR_FLOAT) {
-                        list(, $uval) = unpack('N*', substr($response, $p, 4));
+                        list(, $u_value) = unpack('N*', substr($response, $p, 4));
                         $p += 4;
-                        list(, $fval) = unpack('f*', pack('L', $uval));
-                        $attrvals[$attr] = $fval;
+                        list(, $f_value) = unpack('f*', pack('L', $u_value));
+                        $attr_values[$attr] = $f_value;
                         continue;
                     }
 
-                    // handle everything else as unsigned ints
+                    // handle everything else as unsigned int
                     list(, $val) = unpack('N*', substr($response, $p, 4));
                     $p += 4;
                     if ($type == self::ATTR_MULTI) {
-                        $attrvals[$attr] = array();
-                        $nvalues = $val;
-                        while ($nvalues --> 0 && $p < $max) {
+                        $attr_values[$attr] = array();
+                        $n_values = $val;
+                        while ($n_values --> 0 && $p < $max) {
                             list(, $val) = unpack('N*', substr($response, $p, 4));
                             $p += 4;
-                            $attrvals[$attr][] = fixUInt($val);
+                            $attr_values[$attr][] = fixUInt($val);
                         }
                     } elseif ($type == self::ATTR_MULTI64) {
-                        $attrvals[$attr] = array();
-                        $nvalues = $val;
-                        while ($nvalues > 0 && $p < $max) {
-                            $attrvals[$attr][] = unpack64IntSigned(substr($response, $p, 8));
+                        $attr_values[$attr] = array();
+                        $n_values = $val;
+                        while ($n_values > 0 && $p < $max) {
+                            $attr_values[$attr][] = unpack64IntSigned(substr($response, $p, 8));
                             $p += 8;
-                            $nvalues -= 2;
+                            $n_values -= 2;
                         }
                     } elseif ($type == self::ATTR_STRING) {
-                        $attrvals[$attr] = substr($response, $p, $val);
+                        $attr_values[$attr] = substr($response, $p, $val);
                         $p += $val;
                     } elseif ($type == self::ATTR_FACTORS) {
-                        $attrvals[$attr] = substr($response, $p, $val - 4);
+                        $attr_values[$attr] = substr($response, $p, $val - 4);
                         $p += $val-4;
                     } else {
-                        $attrvals[$attr] = fixUInt($val);
+                        $attr_values[$attr] = fixUInt($val);
                     }
                 }
 
                 if ($this->array_result) {
-                    $result['matches'][$idx]['attrs'] = $attrvals;
+                    $result['matches'][$idx]['attrs'] = $attr_values;
                 } else {
-                    $result['matches'][$doc]['attrs'] = $attrvals;
+                    $result['matches'][$doc]['attrs'] = $attr_values;
                 }
             }
 
