@@ -14,6 +14,8 @@
  * did not, you can find it at http://www.gnu.org/
  */
 
+namespace Sphinx;
+
 /**
  * important properties of PHP's integers:
  *  - always signed (one bit short of PHP_INT_SIZE)

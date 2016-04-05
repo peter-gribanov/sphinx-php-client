@@ -12,7 +12,11 @@
  * it under the terms of the GNU Library General Public License. You should
  * have received a copy of the LGPL license along with this program; if you
  * did not, you can find it at http://www.gnu.org/
- *
+ */
+
+namespace Sphinx;
+
+/**
  * WARNING!!!
  *
  * As of 2015, we strongly recommend to use either SphinxQL or REST APIs
@@ -31,7 +35,7 @@
  * Sphinx searchd client class
  * PHP version of Sphinx searchd client (PHP API)
  */
-class SphinxClient
+class Client
 {
     /**
      * Searchd host

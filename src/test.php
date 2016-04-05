@@ -14,10 +14,12 @@
  * did not, you can find it at http://www.gnu.org/
  */
 
+namespace Sphinx;
+
 $file = __DIR__.'/../vendor/autoload.php';
 
 if (!file_exists($file)) {
-    throw new RuntimeException('Install dependencies to run test suite. "php composer.phar install --dev"');
+    throw new \RuntimeException('Install dependencies to run test suite. "php composer.phar install --dev"');
 }
 
 require_once __DIR__.'/../vendor/autoload.php';
@@ -27,7 +29,7 @@ require_once __DIR__.'/../vendor/autoload.php';
 //////////////////////
 
 // for very old PHP versions, like at my home test server
-if (is_array($argv) && !isset($_SERVER['argv'])) {
+if (isset($argv) && is_array($argv) && !isset($_SERVER['argv'])) {
     $_SERVER['argv'] = $argv;
 }
 unset($_SERVER['argv'][0]);
@@ -64,11 +66,10 @@ EOF;
         $args[] = $arg;
     }
 
-    $cl = new SphinxClient();
+    $cl = new Client();
 
     $q = '';
-    $sql = '';
-    $mode = SphinxClient::MATCH_ALL;
+    $mode = Client::MATCH_ALL;
     $host = 'localhost';
     $port = 9312;
     $index = '*';
@@ -80,7 +81,7 @@ EOF;
     $sort_by = '';
     $sort_expr = '';
     $limit = 20;
-    $ranker = SphinxClient::RANK_PROXIMITY_BM25;
+    $ranker = Client::RANK_PROXIMITY_BM25;
     $select = '';
     $count = count($args);
 
@@ -110,22 +111,22 @@ EOF;
                 break;
             case '-a':
             case '--any':
-                $mode = SphinxClient::MATCH_ANY;
+                $mode = Client::MATCH_ANY;
                 break;
             case '-b':
             case '--boolean':
-                $mode = SphinxClient::MATCH_BOOLEAN;
+                $mode = Client::MATCH_BOOLEAN;
                 break;
             case '-e':
             case '--extended':
-                $mode = SphinxClient::MATCH_EXTENDED;
+                $mode = Client::MATCH_EXTENDED;
                 break;
             case '-e2':
-                $mode = SphinxClient::MATCH_EXTENDED2;
+                $mode = Client::MATCH_EXTENDED2;
                 break;
             case '-ph':
             case '--phrase':
-                $mode = SphinxClient::MATCH_PHRASE;
+                $mode = Client::MATCH_PHRASE;
                 break;
             case '-f':
             case '--filter':
@@ -161,19 +162,19 @@ EOF;
             case '-r':
                 switch (strtolower($args[++$i])) {
                     case 'bm25':
-                        $ranker = SphinxClient::RANK_BM25;
+                        $ranker = Client::RANK_BM25;
                         break;
                     case 'none':
-                        $ranker = SphinxClient::RANK_NONE;
+                        $ranker = Client::RANK_NONE;
                         break;
                     case 'wordcount':
-                        $ranker = SphinxClient::RANK_WORD_COUNT;
+                        $ranker = Client::RANK_WORD_COUNT;
                         break;
                     case 'fieldmask':
-                        $ranker = SphinxClient::RANK_FIELD_MASK;
+                        $ranker = Client::RANK_FIELD_MASK;
                         break;
                     case 'sph04':
-                        $ranker = SphinxClient::RANK_SPH04;
+                        $ranker = Client::RANK_SPH04;
                         break;
                 }
                 break;
@@ -194,13 +195,13 @@ EOF;
         $cl->setFilter($filter, $filter_values);
     }
     if ($group_by) {
-        $cl->setGroupBy($group_by, SphinxClient::GROUP_BY_ATTR, $group_sort);
+        $cl->setGroupBy($group_by, Client::GROUP_BY_ATTR, $group_sort);
     }
     if ($sort_by) {
-        $cl->setSortMode(SphinxClient::SORT_EXTENDED, $sort_by);
+        $cl->setSortMode(Client::SORT_EXTENDED, $sort_by);
     }
     if ($sort_expr) {
-        $cl->setSortMode(SphinxClient::SORT_EXPR, $sort_expr);
+        $cl->setSortMode(Client::SORT_EXPR, $sort_expr);
     }
     if ($distinct) {
         $cl->setGroupDistinct($distinct);
@@ -242,9 +243,9 @@ EOF;
                 print "$n. doc_id={$doc_info['id']}, weight={$doc_info['weight']}";
                 foreach ($res['attrs'] as $attr_name => $attr_type) {
                     $value = $doc_info['attrs'][$attr_name];
-                    if ($attr_type == SphinxClient::ATTR_MULTI || $attr_type == SphinxClient::ATTR_MULTI64) {
+                    if ($attr_type == Client::ATTR_MULTI || $attr_type == Client::ATTR_MULTI64) {
                         $value = '(' . join(',', $value) . ')';
-                    } elseif ($attr_type == SphinxClient::ATTR_TIMESTAMP) {
+                    } elseif ($attr_type == Client::ATTR_TIMESTAMP) {
                         $value = date('Y-m-d H:i:s', $value);
                     }
                     print ", $attr_name=$value";

@@ -14,19 +14,23 @@
  * did not, you can find it at http://www.gnu.org/
  */
 
+namespace Sphinx\Tests;
+
+use Sphinx\Client;
+
 /**
  * Class SphinxClientTest
  */
-class SphinxClientTest extends PHPUnit_Framework_TestCase
+class SphinxClientTest extends \PHPUnit_Framework_TestCase
 {
     /**
-     * @var SphinxClient
+     * @var Client
      */
     protected $sphinx;
 
     protected function setUp()
     {
-        $this->sphinx = new SphinxClient();
+        $this->sphinx = new Client();
     }
 
     public function testGetLastErrorNoError()

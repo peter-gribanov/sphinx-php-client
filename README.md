@@ -28,9 +28,11 @@ Add the following to the `require` section of your composer.json file:
 Search **test** word in Sphinx for **example_idx** index.
 
 ```php
-$sphinx = new SphinxClient();
+use Sphinx\Client;
+
+$sphinx = new Client();
 $sphinx->setServer('localhost', 6712);
-$sphinx->setMatchMode(SphinxClient::MATCH_ANY);
+$sphinx->setMatchMode(Client::MATCH_ANY);
 $sphinx->setMaxQueryTime(3);
 
 $result = $sphinx->query('test', 'example_idx');

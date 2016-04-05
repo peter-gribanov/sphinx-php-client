@@ -16,10 +16,12 @@
 
 /* @link https://github.com/sphinxsearch/sphinx/blob/master/api/test2.php */
 
+namespace Sphinx;
+
 $file = __DIR__.'/../../vendor/autoload.php';
 
 if (!file_exists($file)) {
-    throw new RuntimeException('Install dependencies to run test suite. "php composer.phar install --dev"');
+    throw new \RuntimeException('Install dependencies to run test suite. "php composer.phar install --dev"');
 }
 
 require_once __DIR__.'/../../vendor/autoload.php';
@@ -45,7 +47,7 @@ $opts = array
 foreach (array(0, 1) as $exact) {
     $opts['exact_phrase'] = $exact;
     print 'exact_phrase=' . $exact . PHP_EOL;
-    $cl = new SphinxClient();
+    $cl = new Client();
     $res = $cl->buildExcerpts($docs, $index, $words, $opts);
     if (!$res) {
         exit(sprintf('ERROR: %s.' . PHP_EOL, $cl->getLastError()));

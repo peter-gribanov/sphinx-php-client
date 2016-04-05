@@ -3,11 +3,19 @@
   "description": "Sphinx API client",
   "license": "GPL-3.0",
   "type": "library",
+  "homepage": "http://sphinxsearch.com/",
   "autoload": {
     "files": [
       "src/const.php",
-      "src/functions.php",
-      "src/SphinxClient.php"
-    ]
+      "src/functions.php"
+    ],
+    "psr-0": {
+      "Sphinx\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-0": {
+      "Sphinx\\Test": "tests/unit/"
+    }
   }
 }
