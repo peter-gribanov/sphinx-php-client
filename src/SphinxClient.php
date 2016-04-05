@@ -1479,67 +1479,28 @@ class SphinxClient
         // fixup options
         /////////////////
 
-        if (!isset($opts['before_match'])) {
-            $opts['before_match'] = '<b>';
-        }
-        if (!isset($opts['after_match'])) {
-            $opts['after_match'] = '</b>';
-        }
-        if (!isset($opts['chunk_separator'])) {
-            $opts['chunk_separator'] = ' ... ';
-        }
-        if (!isset($opts['limit'])) {
-            $opts['limit'] = 256;
-        }
-        if (!isset($opts['limit_passages'])) {
-            $opts['limit_passages'] = 0;
-        }
-        if (!isset($opts['limit_words'])) {
-            $opts['limit_words'] = 0;
-        }
-        if (!isset($opts['around'])) {
-            $opts['around'] = 5;
-        }
-        if (!isset($opts['exact_phrase'])) {
-            $opts['exact_phrase'] = false;
-        }
-        if (!isset($opts['single_passage'])) {
-            $opts['single_passage'] = false;
-        }
-        if (!isset($opts['use_boundaries'])) {
-            $opts['use_boundaries'] = false;
-        }
-        if (!isset($opts['weight_order'])) {
-            $opts['weight_order'] = false;
-        }
-        if (!isset($opts['query_mode'])) {
-            $opts['query_mode'] = false;
-        }
-        if (!isset($opts['force_all_words'])) {
-            $opts['force_all_words'] = false;
-        }
-        if (!isset($opts['start_passage_id'])) {
-            $opts['start_passage_id'] = 1;
-        }
-        if (!isset($opts['load_files'])) {
-            $opts['load_files'] = false;
-        }
-        if (!isset($opts['html_strip_mode'])) {
-            $opts['html_strip_mode'] = 'index';
-        }
-        if (!isset($opts['allow_empty'])) {
-            $opts['allow_empty'] = false;
-        }
-        if (!isset($opts['passage_boundary'])) {
-            $opts['passage_boundary'] = 'none';
-        }
-        if (!isset($opts['emit_zones'])) {
-            $opts['emit_zones'] = false;
-        }
-        if (!isset($opts['load_files_scattered'])) {
-            $opts['load_files_scattered'] = false;
-        }
-
+        $opts = array_merge(array(
+            'before_match' => '<b>',
+            'after_match' => '</b>',
+            'chunk_separator' => ' ... ',
+            'limit' => 256,
+            'limit_passages' => 0,
+            'limit_words' => 0,
+            'around' => 5,
+            'exact_phrase' => false,
+            'single_passage' => false,
+            'use_boundaries' => false,
+            'weight_order' => false,
+            'query_mode' => false,
+            'force_all_words' => false,
+            'start_passage_id' => 1,
+            'load_files' => false,
+            'html_strip_mode' => 'index',
+            'allow_empty' => false,
+            'passage_boundary' => 'none',
+            'emit_zones' => false,
+            'load_files_scattered' => false
+        ), $opts);
 
         /////////////////
         // build request
