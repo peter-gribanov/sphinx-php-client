@@ -414,109 +414,65 @@ function sphSetBit($flag, $bit, $on)
 /// sphinx searchd client class
 class SphinxClient
 {
-    protected $host; ///< searchd host (default is 'localhost')
-    protected $port; ///< searchd port (default is 9312)
-    protected $offset; ///< how many records to seek from result-set start (default is 0)
-    protected $limit; ///< how many records to return from result-set starting at offset (default is 20)
-    protected $mode; ///< query matching mode (default is SPH_MATCH_EXTENDED2)
-    protected $weights; ///< per-field weights (default is 1 for all fields)
-    protected $sort; ///< match sorting mode (default is SPH_SORT_RELEVANCE)
-    protected $sort_by; ///< attribute to sort by (defualt is '')
-    protected $min_id; ///< min ID to match (default is 0, which means no limit)
-    protected $max_id; ///< max ID to match (default is 0, which means no limit)
-    protected $filters; ///< search filters
-    protected $group_by; ///< group-by attribute name
-    protected $group_func; ///< group-by function (to pre-process group-by attribute value with)
-    protected $group_sort; ///< group-by sorting clause (to sort groups in result set with)
-    protected $group_distinct; ///< group-by count-distinct attribute
-    protected $max_matches; ///< max matches to retrieve
-    protected $cutoff; ///< cutoff to stop searching at (default is 0)
-    protected $retry_count; ///< distributed retries count
-    protected $retry_delay; ///< distributed retries delay
-    protected $anchor; ///< geographical anchor point
-    protected $index_weights; ///< per-index weights
-    protected $ranker; ///< ranking mode (default is SPH_RANK_PROXIMITY_BM25)
-    protected $rank_expr; ///< ranking mode expression (for SPH_RANK_EXPR)
-    protected $max_query_time; ///< max query time, milliseconds (default is 0, do not limit)
-    protected $field_weights; ///< per-field-name weights
-    protected $overrides; ///< per-query attribute values overrides
-    protected $select; ///< select-list (attributes or expressions, with optional aliases)
-    protected $query_flags; ///< per-query various flags
-    protected $predicted_time; ///< per-query max_predicted_time
-    protected $outer_order_by; ///< outer match sort by
-    protected $outer_offset; ///< outer offset
-    protected $outer_limit; ///< outer limit
-    protected $has_outer;
+    protected $host = 'localhost'; ///< searchd host (default is 'localhost')
+    protected $port = 9312; ///< searchd port (default is 9312)
+    protected $offset = 0; ///< how many records to seek from result-set start (default is 0)
+    protected $limit = 20; ///< how many records to return from result-set starting at offset (default is 20)
+    protected $mode = SPH_MATCH_EXTENDED2; ///< query matching mode (default is SPH_MATCH_EXTENDED2)
+    protected $weights = array(); ///< per-field weights (default is 1 for all fields)
+    protected $sort = SPH_SORT_RELEVANCE; ///< match sorting mode (default is SPH_SORT_RELEVANCE)
+    protected $sort_by = ''; ///< attribute to sort by (defualt is '')
+    protected $min_id = 0; ///< min ID to match (default is 0, which means no limit)
+    protected $max_id = 0; ///< max ID to match (default is 0, which means no limit)
+    protected $filters = array(); ///< search filters
+    protected $group_by = ''; ///< group-by attribute name
+    protected $group_func = SPH_GROUPBY_DAY; ///< group-by function (to pre-process group-by attribute value with)
+    protected $group_sort = '@group desc'; ///< group-by sorting clause (to sort groups in result set with)
+    protected $group_distinct = ''; ///< group-by count-distinct attribute
+    protected $max_matches = 1000; ///< max matches to retrieve
+    protected $cutoff = 0; ///< cutoff to stop searching at (default is 0)
+    protected $retry_count = 0; ///< distributed retries count
+    protected $retry_delay = 0; ///< distributed retries delay
+    protected $anchor = array(); ///< geographical anchor point
+    protected $index_weights = array(); ///< per-index weights
+    protected $ranker = SPH_RANK_PROXIMITY_BM25; ///< ranking mode (default is SPH_RANK_PROXIMITY_BM25)
+    protected $rank_expr = ''; ///< ranking mode expression (for SPH_RANK_EXPR)
+    protected $max_query_time = 0; ///< max query time, milliseconds (default is 0, do not limit)
+    protected $field_weights = array(); ///< per-field-name weights
+    protected $overrides = array(); ///< per-query attribute values overrides
+    protected $select = '*'; ///< select-list (attributes or expressions, with optional aliases)
+    protected $query_flags = 0; ///< per-query various flags
+    protected $predicted_time = 0; ///< per-query max_predicted_time
+    protected $outer_order_by = ''; ///< outer match sort by
+    protected $outer_offset = 0; ///< outer offset
+    protected $outer_limit = 0; ///< outer limit
+    protected $has_outer = false;
 
-    protected $error; ///< last error message
-    protected $warning; ///< last warning message
-    protected $conn_error; ///< connection error vs remote error flag
+    protected $error = ''; ///< last error message
+    protected $warning = ''; ///< last warning message
+    protected $conn_error = false; ///< connection error vs remote error flag
 
-    protected $reqs; ///< requests array for multi-query
-    protected $mbenc; ///< stored mbstring encoding
-    protected $array_result; ///< whether $result['matches'] should be a hash or an array
-    protected $timeout; ///< connect timeout
+    protected $reqs = array(); ///< requests array for multi-query
+    protected $mbenc = ''; ///< stored mbstring encoding
+    protected $array_result = false; ///< whether $result['matches'] should be a hash or an array
+    protected $timeout = 0; ///< connect timeout
+
+    protected $path = false;
+    protected $socket = false;
 
     /////////////////////////////////////////////////////////////////////////////
     // common stuff
     /////////////////////////////////////////////////////////////////////////////
 
-    /// create a new client object and fill defaults
     public function __construct()
     {
-        // per-client-object settings
-        $this->host = 'localhost';
-        $this->port = 9312;
-        $this->_path = false;
-        $this->_socket = false;
-
-        // per-query settings
-        $this->offset = 0;
-        $this->limit = 20;
-        $this->mode = SPH_MATCH_EXTENDED2;
-        $this->weights = array();
-        $this->sort = SPH_SORT_RELEVANCE;
-        $this->sort_by = '';
-        $this->min_id = 0;
-        $this->max_id = 0;
-        $this->filters = array();
-        $this->group_by = '';
-        $this->group_func = SPH_GROUPBY_DAY;
-        $this->group_sort = '@group desc';
-        $this->group_distinct = '';
-        $this->max_matches = 1000;
-        $this->cutoff = 0;
-        $this->retry_count = 0;
-        $this->retry_delay = 0;
-        $this->anchor = array();
-        $this->index_weights = array();
-        $this->ranker = SPH_RANK_PROXIMITY_BM25;
-        $this->rank_expr = '';
-        $this->max_query_time = 0;
-        $this->field_weights = array();
-        $this->overrides = array();
-        $this->select = '*';
         $this->query_flags = sphSetBit(0, 6, true); // default idf=tfidf_normalized
-        $this->predicted_time = 0;
-        $this->outer_order_by = '';
-        $this->outer_offset = 0;
-        $this->outer_limit = 0;
-        $this->has_outer = false;
-
-        $this->error = ''; // per-reply fields (for single-query case)
-        $this->warning = '';
-        $this->conn_error = false;
-
-        $this->reqs = array();// requests storage (for multi-query case)
-        $this->mbenc = '';
-        $this->array_result = false;
-        $this->timeout = 0;
     }
 
     public function __destruct()
     {
-        if ($this->_socket !== false) {
-            fclose($this->_socket);
+        if ($this->socket !== false) {
+            fclose($this->socket);
         }
     }
 
@@ -543,11 +499,11 @@ class SphinxClient
     {
         assert(is_string($host));
         if ($host[0] == '/') {
-            $this->_path = 'unix://' . $host;
+            $this->path = 'unix://' . $host;
             return;
         }
         if (substr($host, 0, 7) == 'unix://') {
-            $this->_path = $host;
+            $this->path = $host;
             return;
         }
 
@@ -555,7 +511,7 @@ class SphinxClient
         $port = intval($port);
         assert(0 <= $port && $port < 65536);
         $this->port = $port == 0 ? 9312 : $port;
-        $this->_path = '';
+        $this->path = '';
     }
 
     /// set server connection timeout (0 to remove)
@@ -599,23 +555,23 @@ class SphinxClient
     /// connect to searchd server
     protected function connect()
     {
-        if ($this->_socket !== false) {
+        if ($this->socket !== false) {
             // we are in persistent connection mode, so we have a socket
             // however, need to check whether it's still alive
-            if (!@feof($this->_socket)) {
-                return $this->_socket;
+            if (!@feof($this->socket)) {
+                return $this->socket;
             }
 
             // force reopen
-            $this->_socket = false;
+            $this->socket = false;
         }
 
         $errno = 0;
         $errstr = '';
         $this->conn_error = false;
 
-        if ($this->_path) {
-            $host = $this->_path;
+        if ($this->path) {
+            $host = $this->path;
             $port = 0;
         } else {
             $host = $this->host;
@@ -629,8 +585,8 @@ class SphinxClient
         }
 
         if (!$fp) {
-            if ($this->_path) {
-                $location = $this->_path;
+            if ($this->path) {
+                $location = $this->path;
             } else {
                 $location = "{$this->host}:{$this->port}";
             }
@@ -681,7 +637,7 @@ class SphinxClient
                 }
             }
         }
-        if ($this->_socket === false) {
+        if ($this->socket === false) {
             fclose($fp);
         }
 
@@ -1854,7 +1810,7 @@ class SphinxClient
 
     public function open()
     {
-        if ($this->_socket !== false) {
+        if ($this->socket !== false) {
             $this->error = 'already connected';
             return false;
         }
@@ -1867,19 +1823,19 @@ class SphinxClient
             return false;
         }
 
-        $this->_socket = $fp;
+        $this->socket = $fp;
         return true;
     }
 
     public function close()
     {
-        if ($this->_socket === false) {
+        if ($this->socket === false) {
             $this->error = 'not connected';
             return false;
         }
 
-        fclose($this->_socket);
-        $this->_socket = false;
+        fclose($this->socket);
+        $this->socket = false;
 
         return true;
     }
