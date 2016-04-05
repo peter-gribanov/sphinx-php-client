@@ -1,30 +1,46 @@
 <?php
+/**
+ * $Id$
+ */
 
-// important properties of PHP's integers:
-//  - always signed (one bit short of PHP_INT_SIZE)
-//  - conversion from string to int is saturated
-//  - float is double
-//  - div converts arguments to floats
-//  - mod converts arguments to ints
+/**
+ * Copyright (c) 2001-2015, Andrew Aksyonoff
+ * Copyright (c) 2008-2015, Sphinx Technologies Inc
+ * All rights reserved
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU Library General Public License. You should
+ * have received a copy of the LGPL license along with this program; if you
+ * did not, you can find it at http://www.gnu.org/
+ */
 
-// the packing code below works as follows:
-//  - when we got an int, just pack it
-//    if performance is a problem, this is the branch users should aim for
-//
-//  - otherwise, we got a number in string form
-//    this might be due to different reasons, but we assume that this is
-//    because it didn't fit into PHP int
-//
-//  - factor the string into high and low ints for packing
-//    - if we have bcmath, then it is used
-//    - if we don't, we have to do it manually (this is the fun part)
-//
-//    - x64 branch does factoring using ints
-//    - x32 (ab)uses floats, since we can't fit unsigned 32-bit number into an int
-//
-// unpacking routines are pretty much the same.
-//  - return ints if we can
-//  - otherwise format number into a string
+/**
+ * important properties of PHP's integers:
+ *  - always signed (one bit short of PHP_INT_SIZE)
+ *  - conversion from string to int is saturated
+ *  - float is double
+ *  - div converts arguments to floats
+ *  - mod converts arguments to ints
+ *
+ * the packing code below works as follows:
+ *  - when we got an int, just pack it
+ *    if performance is a problem, this is the branch users should aim for
+ *
+ *  - otherwise, we got a number in string form
+ *    this might be due to different reasons, but we assume that this is
+ *    because it didn't fit into PHP int
+ *
+ *  - factor the string into high and low ints for packing
+ *    - if we have bcmath, then it is used
+ *    - if we don't, we have to do it manually (this is the fun part)
+ *
+ *    - x64 branch does factoring using ints
+ *    - x32 (ab)uses floats, since we can't fit unsigned 32-bit number into an int
+ *
+ * unpacking routines are pretty much the same.
+ *  - return ints if we can
+ *  - otherwise format number into a string
+ */
 
 /**
  * Pack 64-bit signed
