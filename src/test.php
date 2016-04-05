@@ -68,7 +68,7 @@ EOF;
 
     $q = '';
     $sql = '';
-    $mode = SPH_MATCH_ALL;
+    $mode = SphinxClient::MATCH_ALL;
     $host = 'localhost';
     $port = 9312;
     $index = '*';
@@ -80,7 +80,7 @@ EOF;
     $sortby = '';
     $sortexpr = '';
     $limit = 20;
-    $ranker = SPH_RANK_PROXIMITY_BM25;
+    $ranker = SphinxClient::RANK_PROXIMITY_BM25;
     $select = '';
     $count = count($args);
 
@@ -110,22 +110,22 @@ EOF;
                 break;
             case '-a':
             case '--any':
-                $mode = SPH_MATCH_ANY;
+                $mode = SphinxClient::MATCH_ANY;
                 break;
             case '-b':
             case '--boolean':
-                $mode = SPH_MATCH_BOOLEAN;
+                $mode = SphinxClient::MATCH_BOOLEAN;
                 break;
             case '-e':
             case '--extended':
-                $mode = SPH_MATCH_EXTENDED;
+                $mode = SphinxClient::MATCH_EXTENDED;
                 break;
             case '-e2':
-                $mode = SPH_MATCH_EXTENDED2;
+                $mode = SphinxClient::MATCH_EXTENDED2;
                 break;
             case '-ph':
             case '--phrase':
-                $mode = SPH_MATCH_PHRASE;
+                $mode = SphinxClient::MATCH_PHRASE;
                 break;
             case '-f':
             case '--filter':
@@ -161,19 +161,19 @@ EOF;
             case '-r':
                 switch (strtolower($args[++$i])) {
                     case 'bm25':
-                        $ranker = SPH_RANK_BM25;
+                        $ranker = SphinxClient::RANK_BM25;
                         break;
                     case 'none':
-                        $ranker = SPH_RANK_NONE;
+                        $ranker = SphinxClient::RANK_NONE;
                         break;
                     case 'wordcount':
-                        $ranker = SPH_RANK_WORDCOUNT;
+                        $ranker = SphinxClient::RANK_WORD_COUNT;
                         break;
                     case 'fieldmask':
-                        $ranker = SPH_RANK_FIELDMASK;
+                        $ranker = SphinxClient::RANK_FIELD_MASK;
                         break;
                     case 'sph04':
-                        $ranker = SPH_RANK_SPH04;
+                        $ranker = SphinxClient::RANK_SPH04;
                         break;
                 }
                 break;
@@ -194,13 +194,13 @@ EOF;
         $cl->setFilter($filter, $filtervals);
     }
     if ($groupby) {
-        $cl->setGroupBy($groupby, SPH_GROUPBY_ATTR, $groupsort);
+        $cl->setGroupBy($groupby, SphinxClient::GROUP_BY_ATTR, $groupsort);
     }
     if ($sortby) {
-        $cl->setSortMode(SPH_SORT_EXTENDED, $sortby);
+        $cl->setSortMode(SphinxClient::SORT_EXTENDED, $sortby);
     }
     if ($sortexpr) {
-        $cl->setSortMode(SPH_SORT_EXPR, $sortexpr);
+        $cl->setSortMode(SphinxClient::SORT_EXPR, $sortexpr);
     }
     if ($distinct) {
         $cl->setGroupDistinct($distinct);
@@ -242,9 +242,9 @@ EOF;
                 print "$n. doc_id={$docinfo['id']}, weight={$docinfo['weight']}";
                 foreach ($res['attrs'] as $attrname => $attrtype) {
                     $value = $docinfo['attrs'][$attrname];
-                    if ($attrtype == SPH_ATTR_MULTI || $attrtype == SPH_ATTR_MULTI64) {
+                    if ($attrtype == SphinxClient::ATTR_MULTI || $attrtype == SphinxClient::ATTR_MULTI64) {
                         $value = '(' . join(',', $value) . ')';
-                    } elseif ($attrtype == SPH_ATTR_TIMESTAMP) {
+                    } elseif ($attrtype == SphinxClient::ATTR_TIMESTAMP) {
                         $value = date('Y-m-d H:i:s', $value);
                     }
                     print ", $attrname=$value";
