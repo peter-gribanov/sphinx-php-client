@@ -137,6 +137,13 @@ define('SPH_GROUPBY_ATTRPAIR', 5);
 //  - return ints if we can
 //  - otherwise format number into a string
 
+/**
+ * Pack 64-bit signed
+ *
+ * @param int $value
+ *
+ * @return string
+ */
 function sphPackI64($value)
 {
     assert(is_numeric($value));
@@ -183,7 +190,13 @@ function sphPackI64($value)
     return pack('NN', $h, $l);
 }
 
-/// pack 64-bit unsigned
+/**
+ * Ppack 64-bit unsigned
+ *
+ * @param int $value
+ *
+ * @return string
+ */
 function sphPackU64($value)
 {
     assert(is_numeric($value));
@@ -241,7 +254,13 @@ function sphPackU64($value)
     return pack('NN', $h, $l);
 }
 
-// unpack 64-bit unsigned
+/**
+ * Unpack 64-bit unsigned
+ *
+ * @param string $value
+ *
+ * @return string
+ */
 function sphUnpackU64($value)
 {
     list($hi, $lo) = array_values(unpack('N*N*', $value));
@@ -314,7 +333,13 @@ function sphUnpackU64($value)
     return $h . $l;
 }
 
-// unpack 64-bit signed
+/**
+ * Unpack 64-bit signed
+ *
+ * @param string $value
+ *
+ * @return string
+ */
 function sphUnpackI64($value)
 {
     list($hi, $lo) = array_values(unpack('N*N*', $value));
@@ -383,7 +408,11 @@ function sphUnpackI64($value)
     return $neg . $h . $l;
 }
 
-
+/**
+ * @param int $value
+ *
+ * @return int|string
+ */
 function sphFixUint($value)
 {
     if (PHP_INT_SIZE >= 8) {
@@ -398,6 +427,13 @@ function sphFixUint($value)
     }
 }
 
+/**
+ * @param int $flag
+ * @param int $bit
+ * @param bool $on
+ *
+ * @return int
+ */
 function sphSetBit($flag, $bit, $on)
 {
     if ($on) {
@@ -410,53 +446,297 @@ function sphSetBit($flag, $bit, $on)
 }
 
 
-/// sphinx searchd client class
+/**
+ * Sphinx searchd client class
+ */
 class SphinxClient
 {
-    protected $host = 'localhost'; // searchd host (default is 'localhost')
-    protected $port = 9312; // searchd port (default is 9312)
-    protected $offset = 0; // how many records to seek from result-set start (default is 0)
-    protected $limit = 20; // how many records to return from result-set starting at offset (default is 20)
-    protected $mode = SPH_MATCH_EXTENDED2; // query matching mode (default is SPH_MATCH_EXTENDED2)
-    protected $weights = array(); // per-field weights (default is 1 for all fields)
-    protected $sort = SPH_SORT_RELEVANCE; // match sorting mode (default is SPH_SORT_RELEVANCE)
-    protected $sort_by = ''; // attribute to sort by (defualt is '')
-    protected $min_id = 0; // min ID to match (default is 0, which means no limit)
-    protected $max_id = 0; // max ID to match (default is 0, which means no limit)
-    protected $filters = array(); // search filters
-    protected $group_by = ''; // group-by attribute name
-    protected $group_func = SPH_GROUPBY_DAY; // group-by function (to pre-process group-by attribute value with)
-    protected $group_sort = '@group desc'; // group-by sorting clause (to sort groups in result set with)
-    protected $group_distinct = ''; // group-by count-distinct attribute
-    protected $max_matches = 1000; // max matches to retrieve
-    protected $cutoff = 0; // cutoff to stop searching at (default is 0)
-    protected $retry_count = 0; // distributed retries count
-    protected $retry_delay = 0; // distributed retries delay
-    protected $anchor = array(); // geographical anchor point
-    protected $index_weights = array(); // per-index weights
-    protected $ranker = SPH_RANK_PROXIMITY_BM25; // ranking mode (default is SPH_RANK_PROXIMITY_BM25)
-    protected $rank_expr = ''; // ranking mode expression (for SPH_RANK_EXPR)
-    protected $max_query_time = 0; // max query time, milliseconds (default is 0, do not limit)
-    protected $field_weights = array(); // per-field-name weights
-    protected $overrides = array(); // per-query attribute values overrides
-    protected $select = '*'; // select-list (attributes or expressions, with optional aliases)
-    protected $query_flags = 0; // per-query various flags
-    protected $predicted_time = 0; // per-query max_predicted_time
-    protected $outer_order_by = ''; // outer match sort by
-    protected $outer_offset = 0; // outer offset
-    protected $outer_limit = 0; // outer limit
+    /**
+     * Searchd host
+     *
+     * @var string
+     */
+    protected $host = 'localhost';
+
+    /**
+     * Searchd port
+     *
+     * @var int
+     */
+    protected $port = 9312;
+
+    /**
+     * How many records to seek from result-set start
+     *
+     * @var int
+     */
+    protected $offset = 0;
+
+    /**
+     * How many records to return from result-set starting at offset
+     *
+     * @var int
+     */
+    protected $limit = 20;
+
+    /**
+     * Query matching mode
+     *
+     * @var int
+     */
+    protected $mode = SPH_MATCH_EXTENDED2;
+
+    /**
+     * Per-field weights (default is 1 for all fields)
+     *
+     * @var array
+     */
+    protected $weights = array();
+
+    /**
+     * Match sorting mode
+     *
+     * @var int
+     */
+    protected $sort = SPH_SORT_RELEVANCE;
+
+    /**
+     * Attribute to sort by
+     *
+     * @var string
+     */
+    protected $sort_by = '';
+
+    /**
+     * Min ID to match (0 means no limit)
+     *
+     * @var int
+     */
+    protected $min_id = 0;
+
+    /**
+     * Max ID to match (0 means no limit)
+     *
+     * @var int
+     */
+    protected $max_id = 0;
+
+    /**
+     * Search filters
+     *
+     * @var array
+     */
+    protected $filters = array();
+
+    /**
+     * Group-by attribute name
+     *
+     * @var string
+     */
+    protected $group_by = '';
+
+    /**
+     * Group-by function (to pre-process group-by attribute value with)
+     *
+     * @var int
+     */
+    protected $group_func = SPH_GROUPBY_DAY;
+
+    /**
+     * Group-by sorting clause (to sort groups in result set with)
+     *
+     * @var string
+     */
+    protected $group_sort = '@group desc';
+
+    /**
+     * Group-by count-distinct attribute
+     *
+     * @var string
+     */
+    protected $group_distinct = '';
+
+    /**
+     * Max matches to retrieve
+     *
+     * @var int
+     */
+    protected $max_matches = 1000;
+
+    /**
+     * Cutoff to stop searching at
+     *
+     * @var int
+     */
+    protected $cutoff = 0;
+
+    /**
+     * Distributed retries count
+     *
+     * @var int
+     */
+    protected $retry_count = 0;
+
+    /**
+     * Distributed retries delay
+     *
+     * @var int
+     */
+    protected $retry_delay = 0;
+
+    /**
+     * Geographical anchor point
+     *
+     * @var array
+     */
+    protected $anchor = array();
+
+    /**
+     * Per-index weights
+     *
+     * @var array
+     */
+    protected $index_weights = array();
+
+    /**
+     * Ranking mode
+     *
+     * @var int
+     */
+    protected $ranker = SPH_RANK_PROXIMITY_BM25;
+
+    /**
+     * Ranking mode expression (for SPH_RANK_EXPR)
+     *
+     * @var string
+     */
+    protected $rank_expr = '';
+
+    /**
+     * Max query time, milliseconds (0 means no limit)
+     *
+     * @var int
+     */
+    protected $max_query_time = 0;
+
+    /**
+     * Per-field-name weights
+     *
+     * @var array
+     */
+    protected $field_weights = array();
+
+    /**
+     * Per-query attribute values overrides
+     *
+     * @var array
+     */
+    protected $overrides = array();
+
+    /**
+     * Select-list (attributes or expressions, with optional aliases)
+     *
+     * @var string
+     */
+    protected $select = '*';
+
+    /**
+     * Per-query various flags
+     *
+     * @var int
+     */
+    protected $query_flags = 0;
+
+    /**
+     * Per-query max_predicted_time
+     *
+     * @var int
+     */
+    protected $predicted_time = 0;
+
+    /**
+     * Outer match sort by
+     *
+     * @var string
+     */
+    protected $outer_order_by = '';
+
+    /**
+     * Outer offset
+     *
+     * @var int
+     */
+    protected $outer_offset = 0;
+
+    /**
+     * Outer limit
+     *
+     * @var int
+     */
+    protected $outer_limit = 0;
+
+    /**
+     * @var bool
+     */
     protected $has_outer = false;
 
-    protected $error = ''; // last error message
-    protected $warning = ''; // last warning message
-    protected $conn_error = false; // connection error vs remote error flag
+    /**
+     * Last error message
+     *
+     * @var string
+     */
+    protected $error = '';
 
-    protected $reqs = array(); // requests array for multi-query
-    protected $mbenc = ''; // stored mbstring encoding
-    protected $array_result = false; // whether $result['matches'] should be a hash or an array
-    protected $timeout = 0; // connect timeout
+    /**
+     * Last warning message
+     *
+     * @var string
+     */
+    protected $warning = '';
 
+    /**
+     * Connection error vs remote error flag
+     *
+     * @var bool
+     */
+    protected $conn_error = false;
+
+    /**
+     * Requests array for multi-query
+     *
+     * @var array
+     */
+    protected $reqs = array();
+
+    /**
+     * Stored mbstring encoding
+     *
+     * @var string
+     */
+    protected $mbenc = '';
+
+    /**
+     * Whether $result['matches'] should be a hash or an array
+     *
+     * @var bool
+     */
+    protected $array_result = false;
+
+    /**
+     * Connect timeout
+     *
+     * @var int
+     */
+    protected $timeout = 0;
+
+    /**
+     * @var bool
+     */
     protected $path = false;
+
+    /**
+     * @var resource|bool
+     */
     protected $socket = false;
 
     /////////////////////////////////////////////////////////////////////////////
@@ -465,7 +745,8 @@ class SphinxClient
 
     public function __construct()
     {
-        $this->query_flags = sphSetBit(0, 6, true); // default idf=tfidf_normalized
+        // default idf=tfidf_normalized
+        $this->query_flags = sphSetBit(0, 6, true);
     }
 
     public function __destruct()
@@ -475,25 +756,38 @@ class SphinxClient
         }
     }
 
-    /// get last error message (string)
+    /**
+     * @return string
+     */
     public function getLastError()
     {
         return $this->error;
     }
 
-    /// get last warning message (string)
+    /**
+     * @return string
+     */
     public function getLastWarning()
     {
         return $this->warning;
     }
 
-    /// get last error flag (to tell network connection errors from searchd errors or broken responses)
+    /**
+     * Get last error flag (to tell network connection errors from searchd errors or broken responses)
+     *
+     * @return bool
+     */
     public function isConnectError()
     {
         return $this->conn_error;
     }
 
-    /// set searchd host name (string) and port (integer)
+    /**
+     * Set searchd host name and port
+     *
+     * @param string $host
+     * @param int $port
+     */
     public function setServer($host, $port = 0)
     {
         assert(is_string($host));
@@ -513,14 +807,24 @@ class SphinxClient
         $this->path = '';
     }
 
-    /// set server connection timeout (0 to remove)
+    /**
+     * Set server connection timeout (0 to remove)
+     *
+     * @param int $timeout
+     */
     public function setConnectTimeout($timeout)
     {
         assert(is_numeric($timeout));
         $this->timeout = $timeout;
     }
 
-
+    /**
+     * @param resource $handle
+     * @param string $data
+     * @param int $length
+     *
+     * @return bool
+     */
     protected function send($handle, $data, $length)
     {
         if (feof($handle) || fwrite($handle, $data, $length) !== $length) {
@@ -533,7 +837,9 @@ class SphinxClient
 
     /////////////////////////////////////////////////////////////////////////////
 
-    /// enter mbstring workaround mode
+    /**
+     * Enter mbstring workaround mode
+     */
     protected function mbPush()
     {
         $this->mbenc = '';
@@ -543,7 +849,9 @@ class SphinxClient
         }
     }
 
-    /// leave mbstring workaround mode
+    /**
+     * Leave mbstring workaround mode
+     */
     protected function mbPop()
     {
         if ($this->mbenc) {
@@ -551,7 +859,11 @@ class SphinxClient
         }
     }
 
-    /// connect to searchd server
+    /**
+     * Connect to searchd server
+     *
+     * @return bool|resource
+     */
     protected function connect()
     {
         if ($this->socket !== false) {
@@ -618,7 +930,14 @@ class SphinxClient
         return $fp;
     }
 
-    /// get and check response packet from searchd server
+    /**
+     * Get and check response packet from searchd server
+     *
+     * @param resource $fp
+     * @param int $client_ver
+     *
+     * @return bool|string
+     */
     protected function getResponse($fp, $client_ver)
     {
         $response = '';
@@ -636,6 +955,7 @@ class SphinxClient
                 }
             }
         }
+
         if ($this->socket === false) {
             fclose($fp);
         }
@@ -686,8 +1006,14 @@ class SphinxClient
     // searching
     /////////////////////////////////////////////////////////////////////////////
 
-    /// set offset and count into result set,
-    /// and optionally set max-matches and cutoff limits
+    /**
+     * Set offset and count into result set, and optionally set max-matches and cutoff limits
+     *
+     * @param int $offset
+     * @param int $limit
+     * @param int $max
+     * @param int $cutoff
+     */
     public function setLimits($offset, $limit, $max = 0, $cutoff = 0)
     {
         assert(is_int($offset));
@@ -705,8 +1031,11 @@ class SphinxClient
         }
     }
 
-    /// set maximum query time, in milliseconds, per-index
-    /// integer, 0 means 'do not limit'
+    /**
+     * Set maximum query time, in milliseconds, per-index, 0 means 'do not limit'
+     *
+     * @param int $max
+     */
     public function setMaxQueryTime($max)
     {
         assert(is_int($max));
@@ -714,7 +1043,11 @@ class SphinxClient
         $this->max_query_time = $max;
     }
 
-    /// set matching mode
+    /**
+     * Set matching mode
+     *
+     * @param int $mode
+     */
     public function setMatchMode($mode)
     {
         trigger_error(
@@ -733,7 +1066,12 @@ class SphinxClient
         $this->mode = $mode;
     }
 
-    /// set ranking mode
+    /**
+     * Set ranking mode
+     *
+     * @param int $ranker
+     * @param string $rankexpr
+     */
     public function setRankingMode($ranker, $rankexpr='')
     {
         assert($ranker === 0 || $ranker >= 1 && $ranker < SPH_RANK_TOTAL);
@@ -742,7 +1080,12 @@ class SphinxClient
         $this->rank_expr = $rankexpr;
     }
 
-    /// set matches sorting mode
+    /**
+     * Set matches sorting mode
+     *
+     * @param int $mode
+     * @param string $sortby
+     */
     public function setSortMode($mode, $sortby = '')
     {
         assert (
@@ -770,10 +1113,13 @@ class SphinxClient
         throw new \RuntimeException('This method is now deprecated; please use setFieldWeights instead');
     }
 
-    /// bind per-field weights by name
-    public function setFieldWeights($weights)
+    /**
+     * Bind per-field weights by name
+     *
+     * @param array $weights
+     */
+    public function setFieldWeights(array $weights)
     {
-        assert(is_array($weights));
         foreach ($weights as $name => $weight) {
             assert(is_string($name));
             assert(is_int($weight));
@@ -781,10 +1127,13 @@ class SphinxClient
         $this->field_weights = $weights;
     }
 
-    /// bind per-index weights by name
-    public function setIndexWeights($weights)
+    /**
+     * Bind per-index weights by name
+     *
+     * @param array $weights
+     */
+    public function setIndexWeights(array $weights)
     {
-        assert(is_array($weights));
         foreach ($weights as $index => $weight) {
             assert(is_string($index));
             assert(is_int($weight));
@@ -792,8 +1141,12 @@ class SphinxClient
         $this->index_weights = $weights;
     }
 
-    /// set IDs range to match
-    /// only match records if document ID is beetwen $min and $max (inclusive)
+    /**
+     * Set IDs range to match. Only match records if document ID is beetwen $min and $max (inclusive)
+     *
+     * @param int $min
+     * @param int $max
+     */
     public function setIDRange($min, $max)
     {
         assert(is_numeric($min));
@@ -803,30 +1156,38 @@ class SphinxClient
         $this->max_id = $max;
     }
 
-    /// set values set filter
-    /// only match records where $attribute value is in given set
-    public function setFilter($attribute, $values, $exclude = false)
+    /**
+     * Set values set filter. Only match records where $attribute value is in given set
+     *
+     * @param string $attribute
+     * @param array $values
+     * @param bool $exclude
+     */
+    public function setFilter($attribute, array $values, $exclude = false)
     {
         assert(is_string($attribute));
-        assert(is_array($values));
         assert(count($values));
 
-        if (is_array($values) && count($values)) {
-            foreach ($values as $value) {
-                assert(is_numeric($value));
-            }
-
-            $this->filters[] = array(
-                'type' => SPH_FILTER_VALUES,
-                'attr' => $attribute,
-                'exclude' => $exclude,
-                'values' => $values
-            );
+        foreach ($values as $value) {
+            assert(is_numeric($value));
         }
+
+        $this->filters[] = array(
+            'type' => SPH_FILTER_VALUES,
+            'attr' => $attribute,
+            'exclude' => $exclude,
+            'values' => $values
+        );
     }
 
-    /// set string filter
-    /// only match records where $attribute value is equal
+    /**
+     * Set string filter
+     * Only match records where $attribute value is equal
+     *
+     * @param string $attribute
+     * @param string $value
+     * @param bool $exclude
+     */
     public function setFilterString($attribute, $value, $exclude = false)
     {
         assert(is_string($attribute));
@@ -839,8 +1200,15 @@ class SphinxClient
         );
     }    
 
-    /// set range filter
-    /// only match records if $attribute value is beetwen $min and $max (inclusive)
+    /**
+     * Set range filter
+     * Only match records if $attribute value is beetwen $min and $max (inclusive)
+     *
+     * @param string $attribute
+     * @param int $min
+     * @param int $max
+     * @param bool $exclude
+     */
     public function setFilterRange($attribute, $min, $max, $exclude = false)
     {
         assert(is_string($attribute));
@@ -857,8 +1225,15 @@ class SphinxClient
         );
     }
 
-    /// set float range filter
-    /// only match records if $attribute value is beetwen $min and $max (inclusive)
+    /**
+     * Set float range filter
+     * Only match records if $attribute value is beetwen $min and $max (inclusive)
+     *
+     * @param string $attribute
+     * @param int $min
+     * @param int $max
+     * @param bool $exclude
+     */
     public function setFilterFloatRange($attribute, $min, $max, $exclude = false)
     {
         assert(is_string($attribute));
@@ -875,9 +1250,16 @@ class SphinxClient
         );
     }
 
-    /// setup anchor point for geosphere distance calculations
-    /// required to use @geodist in filters and sorting
-    /// latitude and longitude must be in radians
+    /**
+     * Setup anchor point for geosphere distance calculations
+     * Required to use @geodist in filters and sorting
+     * Latitude and longitude must be in radians
+     *
+     * @param string $attrlat
+     * @param string $attrlong
+     * @param float $lat
+     * @param float $long
+     */
     public function setGeoAnchor($attrlat, $attrlong, $lat, $long)
     {
         assert(is_string($attrlat));
@@ -893,7 +1275,13 @@ class SphinxClient
         );
     }
 
-    /// set grouping attribute and function
+    /**
+     * Set grouping attribute and function
+     *
+     * @param string $attribute
+     * @param string $func
+     * @param string $groupsort
+     */
     public function setGroupBy($attribute, $func, $groupsort = '@group desc')
     {
         assert(is_string($attribute));
@@ -912,14 +1300,23 @@ class SphinxClient
         $this->group_sort = $groupsort;
     }
 
-    /// set count-distinct attribute for group-by queries
+    /**
+     * Set count-distinct attribute for group-by queries
+     *
+     * @param string $attribute
+     */
     public function setGroupDistinct($attribute)
     {
         assert(is_string($attribute));
         $this->group_distinct = $attribute;
     }
 
-    /// set distributed retries count and delay
+    /**
+     * Set distributed retries count and delay
+     *
+     * @param int $count
+     * @param int $delay
+     */
     public function setRetries($count, $delay = 0)
     {
         assert(is_int($count) && $count >= 0);
@@ -928,18 +1325,30 @@ class SphinxClient
         $this->retry_delay = $delay;
     }
 
-    /// set result set format (hash or array; hash by default)
-    /// PHP specific; needed for group-by-MVA result sets that may contain duplicate IDs
+    /**
+     * Set result set format (hash or array; hash by default)
+     * PHP specific; needed for group-by-MVA result sets that may contain duplicate IDs
+     *
+     * @param bool $arrayresult
+     */
     public function setArrayResult($arrayresult)
     {
         assert(is_bool($arrayresult));
         $this->array_result = $arrayresult;
     }
 
-    /// set attribute values override
-    /// there can be only one override per attribute
-    /// $values must be a hash that maps document IDs to attribute values
-    public function setOverride($attrname, $attrtype, $values)
+    /**
+     * Set attribute values override
+     * There can be only one override per attribute
+     * $values must be a hash that maps document IDs to attribute values
+     *
+     * @deprecated Do not call this method. Use SphinxQL REMAP() function instead.
+     *
+     * @param string $attrname
+     * @param string $attrtype
+     * @param array $values
+     */
+    public function setOverride($attrname, $attrtype, array $values)
     {
         trigger_error(
             'DEPRECATED: Do not call this method. Use SphinxQL REMAP() function instead.',
@@ -953,7 +1362,6 @@ class SphinxClient
             SPH_ATTR_FLOAT,
             SPH_ATTR_BIGINT
         )));
-        assert(is_array($values));
 
         $this->overrides[$attrname] = array(
             'attr' => $attrname,
@@ -962,13 +1370,21 @@ class SphinxClient
         );
     }
 
-    /// set select-list (attributes or expressions), SQL-like syntax
+    /**
+     * Set select-list (attributes or expressions), SQL-like syntax
+     *
+     * @param string $select
+     */
     public function setSelect($select)
     {
         assert(is_string($select));
         $this->select = $select;
     }
 
+    /**
+     * @param string $flag_name
+     * @param string|int $flag_value
+     */
     public function setQueryFlag($flag_name, $flag_value)
     {
         $known_names = array(
@@ -1027,7 +1443,13 @@ class SphinxClient
         }
     }
 
-    /// set outer order by parameters
+    /**
+     * Set outer order by parameters
+     *
+     * @param string $orderby
+     * @param int $offset
+     * @param int $limit
+     */
     public function setOuterSelect($orderby, $offset, $limit)
     {
         assert(is_string($orderby));
@@ -1045,14 +1467,18 @@ class SphinxClient
 
     //////////////////////////////////////////////////////////////////////////////
 
-    /// clear all filters (for multi-queries)
+    /**
+     * Clear all filters (for multi-queries)
+     */
     public function resetFilters()
     {
         $this->filters = array();
         $this->anchor = array();
     }
 
-    /// clear groupby settings (for multi-queries)
+    /**
+     * Clear groupby settings (for multi-queries)
+     */
     public function resetGroupBy()
     {
         $this->group_by = '';
@@ -1061,7 +1487,9 @@ class SphinxClient
         $this->group_distinct = '';
     }
 
-    /// clear all attribute value overrides (for multi-queries)
+    /**
+     * Clear all attribute value overrides (for multi-queries)
+     */
     public function resetOverrides()
     {
         $this->overrides = array();
@@ -1083,8 +1511,15 @@ class SphinxClient
 
     //////////////////////////////////////////////////////////////////////////////
 
-    /// connect to searchd server, run given search query through given indexes,
-    /// and return the search results
+    /**
+     * Connect to searchd server, run given search query through given indexes, and return the search results
+     *
+     * @param string  $query
+     * @param string $index
+     * @param string $comment
+     *
+     * @return bool
+     */
     public function query($query, $index = '*', $comment = '')
     {
         assert(empty($this->reqs));
@@ -1106,7 +1541,13 @@ class SphinxClient
         }
     }
 
-    /// helper to pack floats in network byte order
+    /**
+     * Helper to pack floats in network byte order
+     *
+     * @param float $f
+     *
+     * @return string
+     */
     protected function packFloat($f)
     {
         $t1 = pack('f', $f); // machine order
@@ -1114,8 +1555,16 @@ class SphinxClient
         return pack('N', $t2);
     }
 
-    /// add query to multi-query batch
-    /// returns index into results array from RunQueries() call
+    /**
+     * Add query to multi-query batch
+     * Returns index into results array from RunQueries() call
+     *
+     * @param string $query
+     * @param string $index
+     * @param string $comment
+     *
+     * @return int
+     */
     public function addQuery($query, $index = '*', $comment = '')
     {
         // mbstring workaround
@@ -1248,7 +1697,11 @@ class SphinxClient
         return count($this->reqs) - 1;
     }
 
-    /// connect to searchd, run queries batch, and return an array of result sets
+    /**
+     * Connect to searchd, run queries batch, and return an array of result sets
+     *
+     * @return array|bool
+     */
     public function runQueries()
     {
         if (empty($this->reqs)) {
@@ -1282,7 +1735,14 @@ class SphinxClient
         return $this->parseSearchResponse($response, $nreqs);
     }
 
-    /// parse and return search query (or queries) response
+    /**
+     * Parse and return search query (or queries) response
+     *
+     * @param string $response
+     * @param int $nreqs
+     *
+     * @return array
+     */
     protected function parseSearchResponse($response, $nreqs)
     {
         $p = 0; // current position
@@ -1457,15 +1917,21 @@ class SphinxClient
     // excerpts generation
     /////////////////////////////////////////////////////////////////////////////
 
-    /// connect to searchd server, and generate exceprts (snippets)
-    /// of given documents for given query. returns false on failure,
-    /// an array of snippets on success
-    public function buildExcerpts($docs, $index, $words, $opts = array())
+    /**
+     * Connect to searchd server, and generate exceprts (snippets) of given documents for given query.
+     * Returns false on failure, an array of snippets on success
+     *
+     * @param array $docs
+     * @param string $index
+     * @param string $words
+     * @param array $opts
+     *
+     * @return array|bool
+     */
+    public function buildExcerpts(array $docs, $index, $words, array $opts = array())
     {
-        assert(is_array($docs));
         assert(is_string($index));
         assert(is_string($words));
-        assert(is_array($opts));
 
         $this->mbPush();
 
@@ -1598,9 +2064,16 @@ class SphinxClient
     // keyword generation
     /////////////////////////////////////////////////////////////////////////////
 
-    /// connect to searchd server, and generate keyword list for a given query
-    /// returns false on failure,
-    /// an array of words on success
+    /**
+     * Connect to searchd server, and generate keyword list for a given query returns false on failure,
+     * an array of words on success
+     *
+     * @param string $query
+     * @param string $index
+     * @param bool $hits
+     *
+     * @return array|bool
+     */
     public function buildKeywords($query, $index, $hits)
     {
         assert(is_string($query));
@@ -1677,6 +2150,11 @@ class SphinxClient
         return $res;
     }
 
+    /**
+     * @param string $string
+     *
+     * @return string
+     */
     public function escapeString($string)
     {
         $from = array('\\', '(',')','|','-','!','@','~','"','&', '/', '^', '$', '=', '<');
@@ -1689,21 +2167,29 @@ class SphinxClient
     // attribute updates
     /////////////////////////////////////////////////////////////////////////////
 
-    /// batch update given attributes in given rows in given indexes
-    /// returns amount of updated documents (0 or more) on success, or -1 on failure
-    public function updateAttributes($index, $attrs, $values, $mva = false, $ignorenonexistent = false)
+    /**
+     * Batch update given attributes in given rows in given indexes
+     * Returns amount of updated documents (0 or more) on success, or -1 on failure
+     *
+     * @param string $index
+     * @param array $attrs
+     * @param array $values
+     * @param bool $mva
+     * @param bool $ignorenonexistent
+     *
+     * @return int
+     */
+    public function updateAttributes($index, array $attrs, array $values, $mva = false, $ignorenonexistent = false)
     {
         // verify everything
         assert(is_string($index));
         assert(is_bool($mva));
         assert(is_bool($ignorenonexistent));
 
-        assert(is_array($attrs));
         foreach ($attrs as $attr) {
             assert(is_string($attr));
         }
 
-        assert(is_array($values));
         foreach ($values as $id => $entry) {
             assert(is_numeric($id));
             assert(is_array($entry));
@@ -1772,6 +2258,9 @@ class SphinxClient
     // persistent connections
     /////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * @return bool
+     */
     public function open()
     {
         if ($this->socket !== false) {
@@ -1791,6 +2280,9 @@ class SphinxClient
         return true;
     }
 
+    /**
+     * @return bool
+     */
     public function close()
     {
         if ($this->socket === false) {
@@ -1808,6 +2300,11 @@ class SphinxClient
     // status
     //////////////////////////////////////////////////////////////////////////
 
+    /**
+     * @param bool $session
+     *
+     * @return array|bool
+     */
     public function status($session = false)
     {
         assert(is_bool($session));
@@ -1847,6 +2344,9 @@ class SphinxClient
     // flush
     //////////////////////////////////////////////////////////////////////////
 
+    /**
+     * @return int
+     */
     public function flushAttributes()
     {
         $this->mbPush();
