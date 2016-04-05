@@ -606,8 +606,10 @@ class Client
      */
     protected function getResponse($fp, $client_ver)
     {
-        $response = '';
+        $ver = 0;
         $len = 0;
+        $status = -1;
+        $response = '';
 
         $header = fread($fp, 8);
         if (strlen($header) == 8) {
@@ -629,9 +631,11 @@ class Client
         // check response
         $read = strlen($response);
         if (!$response || $read != $len) {
-            $this->error = $len
-                ? "failed to read searchd response (status=$status, ver=$ver, len=$len, read=$read)"
-                : 'received zero-sized searchd response';
+            if ($len) {
+                $this->error = "failed to read searchd response (status=$status, ver=$ver, len=$len, read=$read)";
+            } else {
+                $this->error = 'received zero-sized searchd response';
+            }
             return false;
         }
 
