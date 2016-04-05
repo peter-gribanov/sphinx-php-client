@@ -632,37 +632,33 @@ class SphinxClient
             return false;
         }
 
-        // check status
-        if ($status == self::SEARCHD_WARNING) {
-            list(, $wlen) = unpack('N*', substr($response, 0, 4));
-            $this->warning = substr($response, 4, $wlen);
-            return substr($response, 4 + $wlen);
-        }
-        if ($status == self::SEARCHD_ERROR) {
-            $this->error = 'searchd error: ' . substr($response, 4);
-            return false;
-        }
-        if ($status == self::SEARCHD_RETRY) {
-            $this->error = 'temporary searchd error: ' . substr($response, 4);
-            return false;
-        }
-        if ($status != self::SEARCHD_OK) {
-            $this->error = "unknown status code '$status'";
-            return false;
-        }
+        switch ($status) {
+            case self::SEARCHD_WARNING:
+                list(, $wlen) = unpack('N*', substr($response, 0, 4));
+                $this->warning = substr($response, 4, $wlen);
+                return substr($response, 4 + $wlen);
+            case self::SEARCHD_ERROR:
+                $this->error = 'searchd error: ' . substr($response, 4);
+                return false;
+            case self::SEARCHD_RETRY:
+                $this->error = 'temporary searchd error: ' . substr($response, 4);
+                return false;
+            case self::SEARCHD_OK:
+                if ($ver < $client_ver) { // check version
+                    $this->warning = sprintf(
+                        'searchd command v.%d.%d older than client\'s v.%d.%d, some options might not work',
+                        $ver >> 8,
+                        $ver & 0xff,
+                        $client_ver >> 8,
+                        $client_ver & 0xff
+                    );
+                }
 
-        // check version
-        if ($ver < $client_ver) {
-            $this->warning = sprintf(
-                'searchd command v.%d.%d older than client\'s v.%d.%d, some options might not work',
-                $ver >> 8,
-                $ver & 0xff,
-                $client_ver >> 8,
-                $client_ver & 0xff
-            );
+                return $response;
+            default:
+                $this->error = "unknown status code '$status'";
+                return false;
         }
-
-        return $response;
     }
 
     /////////////////////////////////////////////////////////////////////////////
