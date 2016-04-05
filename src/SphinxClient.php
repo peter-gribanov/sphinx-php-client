@@ -1054,15 +1054,15 @@ class SphinxClient
             'DEPRECATED: Do not call this method or, even better, use SphinxQL instead of an API',
             E_USER_DEPRECATED
         );
-        assert(
-            $mode == SPH_MATCH_ALL ||
-            $mode == SPH_MATCH_ANY ||
-            $mode == SPH_MATCH_PHRASE ||
-            $mode == SPH_MATCH_BOOLEAN ||
-            $mode == SPH_MATCH_EXTENDED ||
-            $mode == SPH_MATCH_FULLSCAN ||
-            $mode == SPH_MATCH_EXTENDED2
-        );
+        assert(in_array($mode, array(
+            SPH_MATCH_ALL,
+            SPH_MATCH_ANY,
+            SPH_MATCH_PHRASE,
+            SPH_MATCH_BOOLEAN,
+            SPH_MATCH_EXTENDED,
+            SPH_MATCH_FULLSCAN,
+            SPH_MATCH_EXTENDED2
+        )));
         $this->mode = $mode;
     }
 
@@ -1088,14 +1088,14 @@ class SphinxClient
      */
     public function setSortMode($mode, $sort_by = '')
     {
-        assert (
-            $mode == SPH_SORT_RELEVANCE ||
-            $mode == SPH_SORT_ATTR_DESC ||
-            $mode == SPH_SORT_ATTR_ASC ||
-            $mode == SPH_SORT_TIME_SEGMENTS ||
-            $mode == SPH_SORT_EXTENDED ||
-            $mode == SPH_SORT_EXPR
-        );
+        assert(in_array($mode, array(
+            SPH_SORT_RELEVANCE,
+            SPH_SORT_ATTR_DESC,
+            SPH_SORT_ATTR_ASC,
+            SPH_SORT_TIME_SEGMENTS,
+            SPH_SORT_EXTENDED,
+            SPH_SORT_EXPR
+        )));
         assert(is_string($sort_by));
         assert($mode == SPH_SORT_RELEVANCE || strlen($sort_by) > 0);
 
@@ -1152,6 +1152,7 @@ class SphinxClient
         assert(is_numeric($min));
         assert(is_numeric($max));
         assert($min <= $max);
+
         $this->min_id = $min;
         $this->max_id = $max;
     }
@@ -1286,14 +1287,14 @@ class SphinxClient
     {
         assert(is_string($attribute));
         assert(is_string($group_sort));
-        assert(
-            $func == SPH_GROUPBY_DAY ||
-            $func == SPH_GROUPBY_WEEK ||
-            $func == SPH_GROUPBY_MONTH ||
-            $func == SPH_GROUPBY_YEAR ||
-            $func == SPH_GROUPBY_ATTR ||
-            $func == SPH_GROUPBY_ATTRPAIR
-        );
+        assert(in_array($func, array(
+            SPH_GROUPBY_DAY,
+            SPH_GROUPBY_WEEK,
+            SPH_GROUPBY_MONTH,
+            SPH_GROUPBY_YEAR,
+            SPH_GROUPBY_ATTR,
+            SPH_GROUPBY_ATTRPAIR
+        )));
 
         $this->group_by = $attribute;
         $this->group_func = $func;
@@ -1534,6 +1535,7 @@ class SphinxClient
 
         $this->error = $results[0]['error'];
         $this->warning = $results[0]['warning'];
+
         if ($results[0]['status'] == SEARCHD_ERROR) {
             return false;
         } else {
