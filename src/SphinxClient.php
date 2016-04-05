@@ -421,40 +421,40 @@ class SphinxClient
     protected $mode; ///< query matching mode (default is SPH_MATCH_EXTENDED2)
     protected $weights; ///< per-field weights (default is 1 for all fields)
     protected $sort; ///< match sorting mode (default is SPH_SORT_RELEVANCE)
-    protected $sortby; ///< attribute to sort by (defualt is '')
+    protected $sort_by; ///< attribute to sort by (defualt is '')
     protected $min_id; ///< min ID to match (default is 0, which means no limit)
     protected $max_id; ///< max ID to match (default is 0, which means no limit)
     protected $filters; ///< search filters
-    protected $groupby; ///< group-by attribute name
-    protected $groupfunc; ///< group-by function (to pre-process group-by attribute value with)
-    protected $groupsort; ///< group-by sorting clause (to sort groups in result set with)
-    protected $groupdistinct; ///< group-by count-distinct attribute
-    protected $maxmatches; ///< max matches to retrieve
+    protected $group_by; ///< group-by attribute name
+    protected $group_func; ///< group-by function (to pre-process group-by attribute value with)
+    protected $group_sort; ///< group-by sorting clause (to sort groups in result set with)
+    protected $group_distinct; ///< group-by count-distinct attribute
+    protected $max_matches; ///< max matches to retrieve
     protected $cutoff; ///< cutoff to stop searching at (default is 0)
-    protected $retrycount; ///< distributed retries count
-    protected $retrydelay; ///< distributed retries delay
+    protected $retry_count; ///< distributed retries count
+    protected $retry_delay; ///< distributed retries delay
     protected $anchor; ///< geographical anchor point
-    protected $indexweights; ///< per-index weights
+    protected $index_weights; ///< per-index weights
     protected $ranker; ///< ranking mode (default is SPH_RANK_PROXIMITY_BM25)
-    protected $rankexpr; ///< ranking mode expression (for SPH_RANK_EXPR)
-    protected $maxquerytime; ///< max query time, milliseconds (default is 0, do not limit)
-    protected $fieldweights; ///< per-field-name weights
+    protected $rank_expr; ///< ranking mode expression (for SPH_RANK_EXPR)
+    protected $max_query_time; ///< max query time, milliseconds (default is 0, do not limit)
+    protected $field_weights; ///< per-field-name weights
     protected $overrides; ///< per-query attribute values overrides
     protected $select; ///< select-list (attributes or expressions, with optional aliases)
     protected $query_flags; ///< per-query various flags
-    protected $predictedtime; ///< per-query max_predicted_time
-    protected $outerorderby; ///< outer match sort by
-    protected $outeroffset; ///< outer offset
-    protected $outerlimit; ///< outer limit
-    protected $hasouter;
+    protected $predicted_time; ///< per-query max_predicted_time
+    protected $outer_order_by; ///< outer match sort by
+    protected $outer_offset; ///< outer offset
+    protected $outer_limit; ///< outer limit
+    protected $has_outer;
 
     protected $error; ///< last error message
     protected $warning; ///< last warning message
-    protected $connerror; ///< connection error vs remote error flag
+    protected $conn_error; ///< connection error vs remote error flag
 
     protected $reqs; ///< requests array for multi-query
     protected $mbenc; ///< stored mbstring encoding
-    protected $arrayresult; ///< whether $result['matches'] should be a hash or an array
+    protected $array_result; ///< whether $result['matches'] should be a hash or an array
     protected $timeout; ///< connect timeout
 
     /////////////////////////////////////////////////////////////////////////////
@@ -476,40 +476,40 @@ class SphinxClient
         $this->mode = SPH_MATCH_EXTENDED2;
         $this->weights = array();
         $this->sort = SPH_SORT_RELEVANCE;
-        $this->sortby = '';
+        $this->sort_by = '';
         $this->min_id = 0;
         $this->max_id = 0;
         $this->filters = array();
-        $this->groupby = '';
-        $this->groupfunc = SPH_GROUPBY_DAY;
-        $this->groupsort = '@group desc';
-        $this->groupdistinct = '';
-        $this->maxmatches = 1000;
+        $this->group_by = '';
+        $this->group_func = SPH_GROUPBY_DAY;
+        $this->group_sort = '@group desc';
+        $this->group_distinct = '';
+        $this->max_matches = 1000;
         $this->cutoff = 0;
-        $this->retrycount = 0;
-        $this->retrydelay = 0;
+        $this->retry_count = 0;
+        $this->retry_delay = 0;
         $this->anchor = array();
-        $this->indexweights = array();
+        $this->index_weights = array();
         $this->ranker = SPH_RANK_PROXIMITY_BM25;
-        $this->rankexpr = '';
-        $this->maxquerytime = 0;
-        $this->fieldweights = array();
+        $this->rank_expr = '';
+        $this->max_query_time = 0;
+        $this->field_weights = array();
         $this->overrides = array();
         $this->select = '*';
         $this->query_flags = sphSetBit(0, 6, true); // default idf=tfidf_normalized
-        $this->predictedtime = 0;
-        $this->outerorderby = '';
-        $this->outeroffset = 0;
-        $this->outerlimit = 0;
-        $this->hasouter = false;
+        $this->predicted_time = 0;
+        $this->outer_order_by = '';
+        $this->outer_offset = 0;
+        $this->outer_limit = 0;
+        $this->has_outer = false;
 
         $this->error = ''; // per-reply fields (for single-query case)
         $this->warning = '';
-        $this->connerror = false;
+        $this->conn_error = false;
 
         $this->reqs = array();// requests storage (for multi-query case)
         $this->mbenc = '';
-        $this->arrayresult = false;
+        $this->array_result = false;
         $this->timeout = 0;
     }
 
@@ -535,7 +535,7 @@ class SphinxClient
     /// get last error flag (to tell network connection errors from searchd errors or broken responses)
     public function isConnectError()
     {
-        return $this->connerror;
+        return $this->conn_error;
     }
 
     /// set searchd host name (string) and port (integer)
@@ -570,7 +570,7 @@ class SphinxClient
     {
         if (feof($handle) || fwrite($handle, $data, $length) !== $length) {
             $this->error = 'connection unexpectedly closed (timed out?)';
-            $this->connerror = true;
+            $this->conn_error = true;
             return false;
         }
         return true;
@@ -612,7 +612,7 @@ class SphinxClient
 
         $errno = 0;
         $errstr = '';
-        $this->connerror = false;
+        $this->conn_error = false;
 
         if ($this->_path) {
             $host = $this->_path;
@@ -637,7 +637,7 @@ class SphinxClient
 
             $errstr = trim($errstr);
             $this->error = "connection to $location failed (errno=$errno, msg=$errstr)";
-            $this->connerror = true;
+            $this->conn_error = true;
             return false;
         }
 
@@ -743,7 +743,7 @@ class SphinxClient
         $this->offset = $offset;
         $this->limit = $limit;
         if ($max > 0) {
-            $this->maxmatches = $max;
+            $this->max_matches = $max;
         }
         if ($cutoff > 0) {
             $this->cutoff = $cutoff;
@@ -756,7 +756,7 @@ class SphinxClient
     {
         assert(is_int($max));
         assert($max >= 0);
-        $this->maxquerytime = $max;
+        $this->max_query_time = $max;
     }
 
     /// set matching mode
@@ -784,7 +784,7 @@ class SphinxClient
         assert($ranker === 0 || $ranker >= 1 && $ranker < SPH_RANK_TOTAL);
         assert(is_string($rankexpr));
         $this->ranker = $ranker;
-        $this->rankexpr = $rankexpr;
+        $this->rank_expr = $rankexpr;
     }
 
     /// set matches sorting mode
@@ -802,7 +802,7 @@ class SphinxClient
         assert($mode == SPH_SORT_RELEVANCE || strlen($sortby) > 0);
 
         $this->sort = $mode;
-        $this->sortby = $sortby;
+        $this->sort_by = $sortby;
     }
 
     /**
@@ -823,7 +823,7 @@ class SphinxClient
             assert(is_string($name));
             assert(is_int($weight));
         }
-        $this->fieldweights = $weights;
+        $this->field_weights = $weights;
     }
 
     /// bind per-index weights by name
@@ -834,7 +834,7 @@ class SphinxClient
             assert(is_string($index));
             assert(is_int($weight));
         }
-        $this->indexweights = $weights;
+        $this->index_weights = $weights;
     }
 
     /// set IDs range to match
@@ -952,16 +952,16 @@ class SphinxClient
             $func == SPH_GROUPBY_ATTRPAIR
         );
 
-        $this->groupby = $attribute;
-        $this->groupfunc = $func;
-        $this->groupsort = $groupsort;
+        $this->group_by = $attribute;
+        $this->group_func = $func;
+        $this->group_sort = $groupsort;
     }
 
     /// set count-distinct attribute for group-by queries
     public function setGroupDistinct($attribute)
     {
         assert(is_string($attribute));
-        $this->groupdistinct = $attribute;
+        $this->group_distinct = $attribute;
     }
 
     /// set distributed retries count and delay
@@ -969,8 +969,8 @@ class SphinxClient
     {
         assert(is_int($count) && $count >= 0);
         assert(is_int($delay) && $delay >= 0);
-        $this->retrycount = $count;
-        $this->retrydelay = $delay;
+        $this->retry_count = $count;
+        $this->retry_delay = $delay;
     }
 
     /// set result set format (hash or array; hash by default)
@@ -978,7 +978,7 @@ class SphinxClient
     public function setArrayResult($arrayresult)
     {
         assert(is_bool($arrayresult));
-        $this->arrayresult = $arrayresult;
+        $this->array_result = $arrayresult;
     }
 
     /// set attribute values override
@@ -1049,7 +1049,7 @@ class SphinxClient
         }
         if ($flag_name == 'max_predicted_time') {
             $this->query_flags = sphSetBit($this->query_flags, 2, $flag_value > 0);
-            $this->predictedtime = (int)$flag_value;
+            $this->predicted_time = (int)$flag_value;
         }
         if ($flag_name == 'boolean_simplify') {
             $this->query_flags = sphSetBit($this->query_flags, 3, $flag_value);
@@ -1077,10 +1077,10 @@ class SphinxClient
         assert($offset >= 0);
         assert($limit > 0);
 
-        $this->outerorderby = $orderby;
-        $this->outeroffset = $offset;
-        $this->outerlimit = $limit;
-        $this->hasouter = true;
+        $this->outer_order_by = $orderby;
+        $this->outer_offset = $offset;
+        $this->outer_limit = $limit;
+        $this->has_outer = true;
     }
 
 
@@ -1096,10 +1096,10 @@ class SphinxClient
     /// clear groupby settings (for multi-queries)
     public function resetGroupBy()
     {
-        $this->groupby = '';
-        $this->groupfunc = SPH_GROUPBY_DAY;
-        $this->groupsort = '@group desc';
-        $this->groupdistinct = '';
+        $this->group_by = '';
+        $this->group_func = SPH_GROUPBY_DAY;
+        $this->group_sort = '@group desc';
+        $this->group_distinct = '';
     }
 
     /// clear all attribute value overrides (for multi-queries)
@@ -1111,15 +1111,15 @@ class SphinxClient
     public function resetQueryFlag()
     {
         $this->query_flags = sphSetBit(0, 6, true); // default idf=tfidf_normalized
-        $this->predictedtime = 0;
+        $this->predicted_time = 0;
     }
 
     public function resetOuterSelect()
     {
-        $this->outerorderby = '';
-        $this->outeroffset = 0;
-        $this->outerlimit = 0;
-        $this->hasouter = false;
+        $this->outer_order_by = '';
+        $this->outer_offset = 0;
+        $this->outer_limit = 0;
+        $this->has_outer = false;
     }
 
     //////////////////////////////////////////////////////////////////////////////
@@ -1165,10 +1165,10 @@ class SphinxClient
         // build request
         $req = pack('NNNNN', $this->query_flags, $this->offset, $this->limit, $this->mode, $this->ranker);
         if ($this->ranker == SPH_RANK_EXPR) {
-            $req .= pack('N', strlen($this->rankexpr)) . $this->rankexpr;
+            $req .= pack('N', strlen($this->rank_expr)) . $this->rank_expr;
         }
         $req .= pack('N', $this->sort); // (deprecated) sort mode
-        $req .= pack('N', strlen($this->sortby)) . $this->sortby;
+        $req .= pack('N', strlen($this->sort_by)) . $this->sort_by;
         $req .= pack('N', strlen($query)) . $query; // query itself
         $req .= pack('N', count($this->weights)); // weights
         foreach ($this->weights as $weight) {
@@ -1206,11 +1206,11 @@ class SphinxClient
         }
 
         // group-by clause, max-matches count, group-sort clause, cutoff count
-        $req .= pack('NN', $this->groupfunc, strlen($this->groupby)) . $this->groupby;
-        $req .= pack('N', $this->maxmatches);
-        $req .= pack('N', strlen($this->groupsort)) . $this->groupsort;
-        $req .= pack('NNN', $this->cutoff, $this->retrycount, $this->retrydelay);
-        $req .= pack('N', strlen($this->groupdistinct)) . $this->groupdistinct;
+        $req .= pack('NN', $this->group_func, strlen($this->group_by)) . $this->group_by;
+        $req .= pack('N', $this->max_matches);
+        $req .= pack('N', strlen($this->group_sort)) . $this->group_sort;
+        $req .= pack('NNN', $this->cutoff, $this->retry_count, $this->retry_delay);
+        $req .= pack('N', strlen($this->group_distinct)) . $this->group_distinct;
 
         // anchor point
         if (empty($this->anchor)) {
@@ -1224,17 +1224,17 @@ class SphinxClient
         }
 
         // per-index weights
-        $req .= pack('N', count($this->indexweights));
-        foreach ($this->indexweights as $idx => $weight) {
+        $req .= pack('N', count($this->index_weights));
+        foreach ($this->index_weights as $idx => $weight) {
             $req .= pack('N', strlen($idx)) . $idx . pack('N', $weight);
         }
 
         // max query time
-        $req .= pack('N', $this->maxquerytime);
+        $req .= pack('N', $this->max_query_time);
 
         // per-field weights
-        $req .= pack('N', count($this->fieldweights));
-        foreach ($this->fieldweights as $field => $weight) {
+        $req .= pack('N', count($this->field_weights));
+        foreach ($this->field_weights as $field => $weight) {
             $req .= pack('N', strlen($field)) . $field . pack('N', $weight);
         }
 
@@ -1269,13 +1269,13 @@ class SphinxClient
         $req .= pack('N', strlen($this->select)) . $this->select;
 
         // max_predicted_time
-        if ($this->predictedtime > 0) {
-            $req .= pack('N', (int)$this->predictedtime);
+        if ($this->predicted_time > 0) {
+            $req .= pack('N', (int)$this->predicted_time);
         }
 
-        $req .= pack('N', strlen($this->outerorderby)) . $this->outerorderby;
-        $req .= pack('NN', $this->outeroffset, $this->outerlimit);
-        if ($this->hasouter) {
+        $req .= pack('N', strlen($this->outer_order_by)) . $this->outer_order_by;
+        $req .= pack('NN', $this->outer_offset, $this->outer_limit);
+        if ($this->has_outer) {
             $req .= pack('N', 1);
         } else {
             $req .= pack('N', 0);
@@ -1408,7 +1408,7 @@ class SphinxClient
                 $weight = sprintf('%u', $weight);
 
                 // create match entry
-                if ($this->arrayresult) {
+                if ($this->array_result) {
                     $result['matches'][$idx] = array('id' => $doc, 'weight' => $weight);
                 } else {
                     $result['matches'][$doc]['weight'] = $weight;
@@ -1463,7 +1463,7 @@ class SphinxClient
                     }
                 }
 
-                if ($this->arrayresult) {
+                if ($this->array_result) {
                     $result['matches'][$idx]['attrs'] = $attrvals;
                 } else {
                     $result['matches'][$doc]['attrs'] = $attrvals;
